@@ -1,5 +1,5 @@
-const databaseManager = require('../config/database');
-const logger = require('../utils/logger');
+const databaseManager = require("../config/database");
+const logger = require("../utils/logger");
 
 /**
  * Base Model class with common database operations
@@ -24,7 +24,7 @@ class BaseModel {
       logger.error(`Database query error in ${this.tableName}:`, {
         sql: sql.substring(0, 100),
         error: error.message,
-        params: params.length > 0 ? 'provided' : 'none',
+        params: params.length > 0 ? "provided" : "none",
       });
       throw error;
     }
@@ -36,9 +36,42 @@ class BaseModel {
    * @returns {Promise<object|null>} - Found record or null
    */
   async findById(id) {
-    const sql = `SELECT * FROM ${this.tableName} WHERE id = $1`;
+    const sql = databaseManager.usePostgres
+      ? `SELECT * FROM ${this.tableName} WHERE id = $1`
+      : `SELECT * FROM ${this.tableName} WHERE id = ?`;
+    console.log(
+      `BaseModel findById - Table: ${this.tableName}, ID: ${id}, SQL: ${sql}`
+    );
     const result = await this.query(sql, [id]);
-    
+    console.log(`BaseModel findById result:`, {
+      rowCount: result.rows ? result.rows.length : "no rows property",
+      result: result,
+      firstRow: result.rows ? result.rows[0] : "no first row",
+    });
+
+    // Debug: Let's check if the record actually exists
+    if (!databaseManager.usePostgres && result.rows.length === 0) {
+      console.log(
+        "🔍 DEBUG: Checking if record exists with raw SQLite query..."
+      );
+      const debugResult = await this.db.allSQLite(
+        `SELECT * FROM ${this.tableName}`,
+        []
+      );
+      console.log(
+        `🔍 DEBUG: All records in ${this.tableName}:`,
+        debugResult.rows
+      );
+      const specificCheck = await this.db.allSQLite(
+        `SELECT * FROM ${this.tableName} WHERE id = ?`,
+        [id]
+      );
+      console.log(
+        `🔍 DEBUG: Specific search for id ${id}:`,
+        specificCheck.rows
+      );
+    }
+
     if (databaseManager.usePostgres) {
       return result.rows.length > 0 ? result.rows[0] : null;
     } else {
@@ -59,11 +92,13 @@ class BaseModel {
 
     // Build WHERE clause
     if (Object.keys(conditions).length > 0) {
-      const whereClause = Object.keys(conditions).map(key => {
-        params.push(conditions[key]);
-        return `${key} = $${paramIndex++}`;
-      }).join(' AND ');
-      
+      const whereClause = Object.keys(conditions)
+        .map((key) => {
+          params.push(conditions[key]);
+          return `${key} = $${paramIndex++}`;
+        })
+        .join(" AND ");
+
       sql += ` WHERE ${whereClause}`;
     }
 
@@ -105,11 +140,11 @@ class BaseModel {
   async create(data) {
     const keys = Object.keys(data);
     const values = Object.values(data);
-    const placeholders = keys.map((_, index) => `$${index + 1}`).join(', ');
-    
+    const placeholders = keys.map((_, index) => `$${index + 1}`).join(", ");
+
     if (databaseManager.usePostgres) {
       const sql = `
-        INSERT INTO ${this.tableName} (${keys.join(', ')})
+        INSERT INTO ${this.tableName} (${keys.join(", ")})
         VALUES (${placeholders})
         RETURNING *
       `;
@@ -118,33 +153,38 @@ class BaseModel {
     } else {
       // For SQLite, RETURNING is not supported, so we use a different approach
       const sql = `
-        INSERT INTO ${this.tableName} (${keys.join(', ')})
+        INSERT INTO ${this.tableName} (${keys.join(", ")})
         VALUES (${placeholders})
       `;
       const result = await this.query(sql, values);
-      
+
       console.log(`SQLite INSERT result for ${this.tableName}:`, {
         lastID: result.lastID,
         changes: result.changes,
         resultType: typeof result,
-        resultKeys: Object.keys(result)
+        resultKeys: Object.keys(result),
       });
-      
-      // SQLite returns lastID for auto-increment primary keys
+
+      // For SQLite with UUID primary keys, lastID is not reliable
+      // Try to find by lastID first (for auto-increment), then fall back to latest record
       if (result.lastID) {
-        console.log(`Finding user by ID: ${result.lastID}`);
+        console.log(`Finding user by lastID: ${result.lastID}`);
         const foundUser = await this.findById(result.lastID);
-        console.log(`Found user:`, foundUser);
-        return foundUser;
-      } else {
-        console.log('No lastID, trying to find latest record');
-        // If no auto-increment, try to find by unique fields
-        // For now, let's get the latest record
-        const latestSql = `SELECT * FROM ${this.tableName} ORDER BY rowid DESC LIMIT 1`;
-        const latestResult = await this.query(latestSql);
-        console.log('Latest record result:', latestResult);
-        return latestResult.rows && latestResult.rows.length > 0 ? latestResult.rows[0] : null;
+        if (foundUser) {
+          console.log(`Found user by lastID:`, foundUser);
+          return foundUser;
+        }
+        console.log("lastID search failed, trying latest record approach");
       }
+
+      // Fallback: Get the latest record (works for UUID primary keys)
+      console.log("Using latest record approach for UUID primary key");
+      const latestSql = `SELECT * FROM ${this.tableName} ORDER BY created_at DESC LIMIT 1`;
+      const latestResult = await this.query(latestSql);
+      console.log("Latest record result:", latestResult);
+      return latestResult.rows && latestResult.rows.length > 0
+        ? latestResult.rows[0]
+        : null;
     }
   }
 
@@ -157,8 +197,10 @@ class BaseModel {
   async update(id, data) {
     const keys = Object.keys(data);
     const values = Object.values(data);
-    const setClause = keys.map((key, index) => `${key} = $${index + 2}`).join(', ');
-    
+    const setClause = keys
+      .map((key, index) => `${key} = $${index + 2}`)
+      .join(", ");
+
     const sql = `
       UPDATE ${this.tableName}
       SET ${setClause}, updated_at = CURRENT_TIMESTAMP
@@ -167,7 +209,7 @@ class BaseModel {
     `;
 
     const result = await this.query(sql, [id, ...values]);
-    
+
     if (databaseManager.usePostgres) {
       return result.rows.length > 0 ? result.rows[0] : null;
     } else {
@@ -184,7 +226,7 @@ class BaseModel {
   async delete(id) {
     const sql = `DELETE FROM ${this.tableName} WHERE id = $1`;
     const result = await this.query(sql, [id]);
-    
+
     if (databaseManager.usePostgres) {
       return result.rowCount > 0;
     } else {
@@ -203,16 +245,18 @@ class BaseModel {
     let paramIndex = 1;
 
     if (Object.keys(conditions).length > 0) {
-      const whereClause = Object.keys(conditions).map(key => {
-        params.push(conditions[key]);
-        return `${key} = $${paramIndex++}`;
-      }).join(' AND ');
-      
+      const whereClause = Object.keys(conditions)
+        .map((key) => {
+          params.push(conditions[key]);
+          return `${key} = $${paramIndex++}`;
+        })
+        .join(" AND ");
+
       sql += ` WHERE ${whereClause}`;
     }
 
     const result = await this.query(sql, params);
-    
+
     if (databaseManager.usePostgres) {
       return parseInt(result.rows[0].count);
     } else {
@@ -248,7 +292,7 @@ class BaseModel {
    */
   buildPagination(page, limit, total) {
     const totalPages = Math.ceil(total / limit);
-    
+
     return {
       page,
       limit,

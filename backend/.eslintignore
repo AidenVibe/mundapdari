@@ -1,0 +1,17 @@
+# 성능 최적화를 위한 ESLint 제외 패턴
+node_modules/
+dist/
+build/
+coverage/
+logs/
+*.log
+*.min.js
+*.bundle.js
+
+# 데이터베이스 관련
+database/
+*.db
+*.db-*
+
+# 환경설정
+.env*

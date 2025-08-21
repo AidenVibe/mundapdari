@@ -31,7 +31,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/mundapdari.git"
+    "url": "https://github.com/AidenVibe/mundapdari.git"
   },
   "keywords": [
     "family",
@@ -51,18 +51,17 @@
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
+    "backend/**/*.js": [
+      "cd backend && eslint --fix",
+      "cd backend && prettier --write"
+    ],
+    "frontend/**/*.{ts,tsx,js,jsx}": [
+      "cd frontend && eslint --fix",
+      "cd frontend && prettier --write"
     ],
     "*.{json,md}": [
-      "prettier --write"
+      "prettier --write --ignore-unknown"
     ]
   }
 }

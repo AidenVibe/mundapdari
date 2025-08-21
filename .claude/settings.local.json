@@ -32,7 +32,14 @@
       "Bash(git remote add:*)",
       "Bash(git branch:*)",
       "Bash(git add:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "mcp__playwright__browser_press_key",
+      "Bash(git push:*)",
+      "Bash(npx husky:*)",
+      "mcp__playwright__browser_evaluate",
+      "Bash(npm run lint:*)",
+      "Bash(time npm run lint:*)",
+      "Bash(time git commit -m \"🚀 성능 최적화: 커밋 속도 개선\n\n🔧 주요 개선사항:\n- ESLint 설정 추가로 린트 오류 해결\n- lint-staged 경로별 최적화\n- 최신 Husky 방식으로 전환\n- Git 설정 Windows 환경 최적화\n- .eslintignore로 불필요한 파일 제외\n\n⚡ 성능 향상:\n- 커밋 시간 대폭 단축\n- 린트 실행 시간 최적화\n- 불필요한 파일 스캔 제거\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\")"
     ],
     "deny": [],
     "ask": []
