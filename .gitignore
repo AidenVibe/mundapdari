@@ -1,0 +1,263 @@
+# ========================================
+# 🔒 SECURITY - 환경변수 및 민감정보 보호
+# ========================================
+
+# 환경 설정 파일들 (절대 커밋하지 말 것!)
+.env
+.env.*
+!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging
+
+# 설정 파일들
+config.json
+config.local.json
+secrets.json
+credentials.json
+
+# API 키 및 인증서
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+id_rsa*
+*.pub
+
+# 데이터베이스 관련 민감정보
+database.json
+db-config.json
+connection-strings.txt
+
+# ========================================
+# 📁 Dependencies & Build
+# ========================================
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+dist-ssr/
+*.local
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output
+
+# ========================================
+# 🗄️ Database & Logs
+# ========================================
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# 로그 파일들
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ========================================
+# 🛠️ Development Tools
+# ========================================
+
+# IDE & Editors
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# ========================================
+# 🧪 Testing & Quality
+# ========================================
+
+# Test results
+test-results/
+playwright-report/
+test-output/
+coverage/
+
+# Cache directories
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist
+
+# ========================================
+# 🚀 Deployment & DevOps
+# ========================================
+
+# Docker
+.dockerignore
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Kubernetes
+*.kubeconfig
+
+# Cloud provider credentials
+.aws/
+.gcp/
+.azure/
+
+# ========================================
+# 📦 Package managers
+# ========================================
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# npm
+package-lock.json
+.npm/
+
+# ========================================
+# 🔧 Misc
+# ========================================
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+.temp/
+tmp/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Editor backup files
+*~
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+.tmp/
+.temp/
+
+# ========================================
+# ⚠️ 추가 보안 패턴 (외부 도구 대비)
+# ========================================
+
+# Webhook 설정
+webhook.json
+webhooks.json
+
+# CI/CD 민감정보
+.github/workflows/*.secret.*
+deploy-keys/
+ci-secrets/
+
+# 모니터링 & 로깅 서비스
+sentry.properties
+datadog.yaml
+newrelic.ini
+
+# 백업 및 덤프 파일
+*.sql
+*.dump
+backup/
+dumps/
+
+# 암호화 키 및 서명
+*.gpg
+*.asc
+signing-key.*
+encryption-key.*
+
+# 시스템 파일
+nul
