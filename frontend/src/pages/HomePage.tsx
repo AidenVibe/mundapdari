@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Card, LoadingSpinner, Textarea, Modal } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { useQuestionStore } from '@/stores/questionStore';
+import { getRandomDefaultQuestion, formatDefaultQuestion } from '@/utils/defaultQuestions';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 
@@ -24,26 +25,48 @@ const HomePage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [defaultQuestion, setDefaultQuestion] = useState<any>(null);
+  const [defaultAnswer, setDefaultAnswer] = useState('');
 
   useEffect(() => {
     fetchTodaysQuestion();
   }, []);
 
+  // 질문이 없을 때 기본 질문 생성
   useEffect(() => {
-    if (myAnswer) {
-      setAnswerContent(myAnswer.content);
+    if (!isLoading && !todaysQuestion && !error) {
+      const randomQuestion = getRandomDefaultQuestion();
+      const formattedQuestion = formatDefaultQuestion(randomQuestion);
+      setDefaultQuestion(formattedQuestion);
     }
-  }, [myAnswer]);
+  }, [isLoading, todaysQuestion, error]);
+
+  useEffect(() => {
+    if (todaysQuestion && myAnswer) {
+      setAnswerContent(myAnswer.content);
+    } else if (defaultQuestion && !todaysQuestion) {
+      setAnswerContent(defaultAnswer);
+    }
+  }, [myAnswer, defaultQuestion, todaysQuestion, defaultAnswer]);
 
   const handleSubmitAnswer = async () => {
-    if (!answerContent.trim() || !todaysQuestion) {
+    const currentQuestion = getCurrentQuestion();
+    if (!answerContent.trim() || !currentQuestion) {
       return;
     }
 
     try {
       setIsSubmitting(true);
-      await submitAnswer(answerContent.trim());
-      // fetchAnswers는 submitAnswer 내부에서 답변 제출 후 myAnswer가 업데이트되므로 불필요
+      
+      // 기본 질문인 경우 로컬에서만 저장
+      if (currentQuestion.isDefault) {
+        // 기본 질문에 대한 답변은 로컬 상태로만 관리
+        setDefaultAnswer(answerContent.trim());
+        toast.success('답변이 저장되었습니다!');
+      } else {
+        // 서버 질문인 경우 기존 로직 사용
+        await submitAnswer(answerContent.trim());
+      }
     } catch (error) {
       // 에러는 store에서 처리됨
     } finally {
@@ -76,6 +99,20 @@ const HomePage: React.FC = () => {
     if (!user?.inviteCode) return '';
     const baseUrl = window.location.origin;
     return `${baseUrl}/invite/${user.inviteCode}`;
+  };
+
+  // 현재 표시할 질문 반환 (서버 질문 우선, 없으면 기본 질문)
+  const getCurrentQuestion = () => {
+    return todaysQuestion || defaultQuestion;
+  };
+
+  // 새로운 기본 질문 생성
+  const generateNewDefaultQuestion = () => {
+    const randomQuestion = getRandomDefaultQuestion();
+    const formattedQuestion = formatDefaultQuestion(randomQuestion);
+    setDefaultQuestion(formattedQuestion);
+    setAnswerContent(''); // 답변 내용 초기화
+    setDefaultAnswer(''); // 기본 답변 초기화
   };
 
   const handleCopyInviteLink = async () => {
@@ -135,59 +172,41 @@ const HomePage: React.FC = () => {
               </p>
               <h1 className="text-2xl font-bold">{user?.name}님!</h1>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               {/* 혼자 사용 중일 때 초대 버튼 */}
               {isAlone() && (
                 <button
                   onClick={() => setShowInviteModal(true)}
-                  className="text-white text-opacity-80 hover:text-opacity-100 p-2"
-                  aria-label="가족 초대하기"
+                  className="text-white text-opacity-90 hover:text-opacity-100 text-sm font-medium bg-white bg-opacity-20 px-3 py-2 rounded-lg backdrop-blur-sm transition-all hover:bg-opacity-30"
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
+                  가족 초대
                 </button>
               )}
               <button
                 onClick={() => setShowLogoutModal(true)}
-                className="text-white text-opacity-80 hover:text-opacity-100 p-2"
-                aria-label="설정"
+                className="text-white text-opacity-90 hover:text-opacity-100 text-sm font-medium bg-white bg-opacity-20 px-3 py-2 rounded-lg backdrop-blur-sm transition-all hover:bg-opacity-30"
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
-                  />
-                </svg>
+                설정
               </button>
             </div>
           </div>
 
-          {todaysQuestion && (
+          {getCurrentQuestion() && (
             <div className="bg-white bg-opacity-10 rounded-lg p-4 backdrop-blur-sm">
               <p className="text-white text-opacity-90 text-sm mb-2">
-                오늘의 질문
+                {getCurrentQuestion()?.isDefault ? '오늘의 기본 질문' : '오늘의 질문'}
               </p>
               <p className="text-white text-lg font-medium leading-relaxed">
-                {todaysQuestion.content}
+                {getCurrentQuestion()?.content}
               </p>
+              {getCurrentQuestion()?.isDefault && (
+                <button
+                  onClick={generateNewDefaultQuestion}
+                  className="mt-3 text-white text-opacity-80 hover:text-opacity-100 text-sm underline"
+                >
+                  다른 질문으로 바꾸기
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -219,18 +238,51 @@ const HomePage: React.FC = () => {
           </Card>
         )}
 
-        {todaysQuestion ? (
+        {getCurrentQuestion() ? (
           <div className="space-y-6">
+            {/* 기본 질문 안내 카드 */}
+            {getCurrentQuestion()?.isDefault && (
+              <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+                <div className="flex items-start space-x-3">
+                  <div className="text-2xl">💡</div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-orange-900 mb-2">
+                      기본 질문으로 대화를 시작해보세요!
+                    </h3>
+                    <p className="text-orange-700 text-sm mb-3">
+                      서버에서 오늘의 질문이 아직 준비되지 않아 기본 질문을 제공해드려요. 
+                      언제든 답변하고 대화를 나눌 수 있어요.
+                    </p>
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={generateNewDefaultQuestion}
+                    >
+                      다른 질문으로 바꾸기
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            )}
+
             {/* 내 답변 카드 */}
             <Card>
               <div className="mb-4">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   내 답변
                 </h3>
-                {myAnswer && (
-                  <p className="text-sm text-gray-500">
-                    {dayjs(myAnswer.createdAt).format('MM월 DD일 HH:mm')}에 작성
-                  </p>
+                {getCurrentQuestion()?.isDefault ? (
+                  defaultAnswer && (
+                    <p className="text-sm text-gray-500">
+                      기본 질문에 대한 답변
+                    </p>
+                  )
+                ) : (
+                  myAnswer && (
+                    <p className="text-sm text-gray-500">
+                      {dayjs(myAnswer.createdAt).format('MM월 DD일 HH:mm')}에 작성
+                    </p>
+                  )
                 )}
               </div>
 
@@ -252,7 +304,10 @@ const HomePage: React.FC = () => {
                 loading={isSubmitting}
                 disabled={!answerContent.trim() || isSubmitting}
               >
-                {myAnswer ? '답변 수정하기' : '답변 저장하기'}
+                {getCurrentQuestion()?.isDefault 
+                  ? (defaultAnswer ? '답변 수정하기' : '답변 저장하기')
+                  : (myAnswer ? '답변 수정하기' : '답변 저장하기')
+                }
               </Button>
             </Card>
 
@@ -270,13 +325,23 @@ const HomePage: React.FC = () => {
                 )}
               </div>
 
-              {partnerAnswer ? (
+              {getCurrentQuestion()?.isDefault ? (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-3">🤔</div>
+                  <p className="text-gray-600 mb-2">
+                    기본 질문에는 {getPartnerName()}의 답변이 표시되지 않아요
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    서버 질문이 업데이트되면 함께 대화할 수 있어요!
+                  </p>
+                </div>
+              ) : partnerAnswer ? (
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-gray-800 leading-relaxed whitespace-pre-wrap select-text">
                     {partnerAnswer.content}
                   </p>
                 </div>
-              ) : myAnswer ? (
+              ) : (myAnswer || defaultAnswer) ? (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-3">⏳</div>
                   <p className="text-gray-600 mb-2">
@@ -303,12 +368,10 @@ const HomePage: React.FC = () => {
           <Card className="text-center">
             <div className="text-6xl mb-4">📅</div>
             <h2 className="text-xl font-semibold text-gray-800 mb-3">
-              오늘의 질문이 준비되지 않았어요
+              질문을 불러오고 있어요
             </h2>
-            <p className="text-gray-600 mb-6">잠시 후 다시 확인해주세요</p>
-            <Button onClick={fetchTodaysQuestion} variant="primary">
-              다시 확인하기
-            </Button>
+            <p className="text-gray-600 mb-6">잠시만 기다려주세요</p>
+            <LoadingSpinner size="medium" />
           </Card>
         )}
       </div>
@@ -351,23 +414,64 @@ const HomePage: React.FC = () => {
         </div>
       </Modal>
 
-      {/* 로그아웃 모달 */}
+      {/* 설정 모달 */}
       <Modal
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
-        title="로그아웃"
+        title="설정"
       >
-        <div className="text-center">
-          <p className="text-gray-600 mb-6">정말 로그아웃하시겠어요?</p>
-          <div className="flex space-x-3">
+        <div className="space-y-4">
+          {/* 사용자 정보 섹션 */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3">내 정보</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">이름</span>
+                <span className="text-gray-800 font-medium">{user?.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">관계</span>
+                <span className="text-gray-800 font-medium">
+                  {user?.role === 'parent' ? '부모' : '자녀'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">연결 상태</span>
+                <span className={`font-medium ${isAlone() ? 'text-orange-600' : 'text-green-600'}`}>
+                  {isAlone() ? '가족 대기 중' : '가족과 연결됨'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 초대 코드 섹션 */}
+          {user?.inviteCode && (
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h3 className="text-sm font-semibold text-gray-800 mb-2">내 초대 코드</h3>
+              <div className="bg-white rounded px-3 py-2 text-sm font-mono text-gray-700 border">
+                {user.inviteCode}
+              </div>
+              <p className="text-xs text-gray-600 mt-2">
+                가족과 연결하려면 이 코드를 공유해주세요
+              </p>
+            </div>
+          )}
+
+          {/* 버튼 섹션 */}
+          <div className="space-y-3 pt-2">
             <Button
               variant="secondary"
               fullWidth
               onClick={() => setShowLogoutModal(false)}
             >
-              취소
+              닫기
             </Button>
-            <Button variant="error" fullWidth onClick={handleLogout}>
+            <Button 
+              variant="error" 
+              fullWidth 
+              onClick={handleLogout}
+              className="text-sm"
+            >
               로그아웃
             </Button>
           </div>

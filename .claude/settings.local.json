@@ -65,7 +65,13 @@
       "mcp__context7__resolve-library-id",
       "Bash(tasklist)",
       "Bash(taskkill:*)",
-      "Bash(wmic process where:*)"
+      "Bash(wmic process where:*)",
+      "Bash(git fsck:*)",
+      "Bash(git update-index:*)",
+      "Bash(echo $PORT)",
+      "mcp__magic__21st_magic_component_builder",
+      "mcp__magic__21st_magic_component_inspiration",
+      "mcp__playwright__browser_resize"
     ],
     "deny": [],
     "ask": []

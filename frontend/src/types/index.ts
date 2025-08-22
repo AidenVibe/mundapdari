@@ -13,6 +13,10 @@ export interface User {
   role: 'parent' | 'child';
   inviteCode?: string;
   pairId?: number;
+  phone?: string; // OAuth 시 선택적
+  authProvider?: 'local' | 'kakao'; // 인증 제공자
+  providerId?: string; // OAuth 제공자의 사용자 ID
+  profileImage?: string; // 카카오에서 제공되는 프로필 이미지
   createdAt: string;
   updatedAt: string;
 }
@@ -140,7 +144,7 @@ export type RouteParams = {
 
 // Component Props Types
 export interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'success' | 'error';
+  variant?: 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error' | 'ghost' | 'outline';
   size?: 'small' | 'medium' | 'large';
   fullWidth?: boolean;
   loading?: boolean;

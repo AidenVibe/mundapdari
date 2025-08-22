@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Button, Card, Input } from '@/components/ui';
+import { Button, Card, Input, ExistingAccountModal } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import type { RegistrationForm, FormErrors } from '@/types';
 
@@ -19,6 +19,7 @@ const RegisterPage: React.FC = () => {
   });
   
   const [errors, setErrors] = useState<FormErrors>({});
+  const [showExistingAccountModal, setShowExistingAccountModal] = useState(false);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -67,21 +68,47 @@ const RegisterPage: React.FC = () => {
       
       navigate('/home');
     } catch (error: any) {
-      // 409 에러 (중복 전화번호)인 경우 로그인 페이지로 이동할지 묻기
-      if (error.message && error.message.includes('이미 가입된 전화번호입니다')) {
-        const shouldGoToLogin = window.confirm(
-          '이미 가입된 전화번호입니다. 로그인 페이지로 이동하시겠습니까?'
-        );
-        if (shouldGoToLogin) {
-          navigate('/login');
-        }
+      console.log('Registration error:', error); // 디버깅용
+      
+      // 409 에러 (중복 전화번호)인 경우 사용자 친화적 모달 표시
+      const isDuplicateError = (
+        error.status === 409 ||
+        (error.message && (
+          error.message.includes('이미 가입된 전화번호입니다') || 
+          error.message.includes('already exists') ||
+          error.message.includes('already registered') ||
+          error.message.includes('Resource conflict')
+        ))
+      );
+      
+      if (isDuplicateError) {
+        console.log('Showing duplicate account modal'); // 디버깅용
+        setShowExistingAccountModal(true);
       }
+      // 다른 에러들은 기본 토스트로 처리 (authStore에서 이미 처리됨)
     }
   };
 
   const handleRoleSelect = (role: 'parent' | 'child') => {
     setFormData(prev => ({ ...prev, role }));
   };
+
+  const handleGoToLogin = () => {
+    setShowExistingAccountModal(false);
+    navigate('/login');
+  };
+
+  const handleCloseModal = () => {
+    setShowExistingAccountModal(false);
+    // 전화번호 필드를 비워서 다른 번호로 시도할 수 있게 함
+    setFormData(prev => ({ ...prev, phone: '' }));
+    setErrors({});
+  };
+
+  // 디버깅을 위한 useEffect 추가
+  React.useEffect(() => {
+    console.log('Modal state changed:', showExistingAccountModal);
+  }, [showExistingAccountModal]);
 
   return (
     <div className="min-h-screen bg-gradient-primary flex items-center justify-center p-4">
@@ -208,6 +235,14 @@ const RegisterPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* 기존 계정 모달 */}
+      <ExistingAccountModal
+        isOpen={showExistingAccountModal}
+        onClose={handleCloseModal}
+        onGoToLogin={handleGoToLogin}
+        phone={formData.phone}
+      />
     </div>
   );
 };

@@ -14,6 +14,7 @@
     -webkit-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    min-height: 100%;
   }
 
   body {
@@ -21,7 +22,10 @@
     padding: 0;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     color: #1a202c;
-    background-color: #f7fafc;
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+    background: linear-gradient(180deg, #f0fffe 0%, #ffffff 100%);
     line-height: 1.6;
   }
 
@@ -247,16 +251,16 @@
     overflow: hidden;
   }
 
-  /* Gradient backgrounds */
+  /* Gradient backgrounds (로고 기반 따뜻한 색상) */
   .bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #E8A158 0%, #E17B7B 100%);
   }
 
   .bg-gradient-secondary {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #f7b877 0%, #f7b0ab 100%);
   }
 
   .bg-gradient-success {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: linear-gradient(135deg, #b3e8c2 0%, #8fd9a1 100%);
   }
 }

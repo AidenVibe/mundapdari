@@ -4,3 +4,8 @@ export { default as Textarea } from './Textarea';
 export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as Card } from './Card';
 export { default as Modal } from './Modal';
+export { default as ExistingAccountModal } from './ExistingAccountModal';
+export { default as FAB } from './FAB';
+export { default as Chip } from './Chip';
+export { default as Badge, BadgeWrapper } from './Badge';
+export { default as Avatar, AvatarGroup } from './Avatar';

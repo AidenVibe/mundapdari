@@ -70,9 +70,16 @@ export const useAuthStore = create<AuthStore>()(
         } catch (error: any) {
           let errorMessage = error.message || '회원가입에 실패했습니다.';
           
-          // 409 Conflict 에러 (중복 전화번호) 처리
-          if (error.message && error.message.includes('already exists')) {
-            errorMessage = '이미 가입된 전화번호입니다. 로그인을 시도해보세요.';
+          // 409 Conflict 에러 (중복 전화번호) 처리 - UI에서 모달로 처리하므로 토스트는 표시하지 않음
+          const isDuplicateError = error.message && (
+            error.message.includes('already exists') || 
+            error.message.includes('이미 가입된 전화번호입니다') ||
+            error.message.includes('already registered') ||
+            error.status === 409
+          );
+          
+          if (isDuplicateError) {
+            errorMessage = '이미 가입된 전화번호입니다.';
           }
           
           set({ 
@@ -82,7 +89,12 @@ export const useAuthStore = create<AuthStore>()(
             token: null,
             isAuthenticated: false,
           });
-          toast.error(errorMessage);
+          
+          // 중복 에러가 아닌 경우만 토스트 표시 (UI에서 모달로 처리)
+          if (!isDuplicateError) {
+            toast.error(errorMessage);
+          }
+          
           throw error;
         }
       },

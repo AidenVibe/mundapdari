@@ -56,8 +56,14 @@ class ApiClient {
         if (!error.response) {
           error.message = '네트워크 연결을 확인해주세요.';
         } else {
+          // 서버에서 제공한 에러 메시지 우선 사용
           error.message =
-            error.response.data?.message || '서버 오류가 발생했습니다.';
+            error.response.data?.message || 
+            error.response.data?.error || 
+            `서버 오류가 발생했습니다. (${error.response.status})`;
+          
+          // HTTP 상태 코드도 에러 객체에 추가
+          error.status = error.response.status;
         }
 
         return Promise.reject(error);

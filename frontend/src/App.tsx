@@ -12,6 +12,7 @@ import InvitePage from '@/pages/InvitePage';
 import RegisterPage from '@/pages/RegisterPage';
 import LoginPage from '@/pages/LoginPage';
 import HomePage from '@/pages/HomePage';
+import ComponentsDemo from '@/pages/ComponentsDemo';
 
 const App: React.FC = () => {
   const { loadUser, isLoading, isAuthenticated } = useAuthStore();
@@ -76,6 +77,9 @@ const App: React.FC = () => {
               </ProtectedRoute>
             } 
           />
+
+          {/* 디자인 시스템 데모 (개발용) */}
+          <Route path="/components" element={<ComponentsDemo />} />
 
           {/* 404 페이지 */}
           <Route path="*" element={<Navigate to="/" replace />} />
