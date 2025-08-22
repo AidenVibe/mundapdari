@@ -9,15 +9,15 @@ import toast from 'react-hot-toast';
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
-  const { 
-    todaysQuestion, 
-    myAnswer, 
-    partnerAnswer, 
-    isLoading, 
-    error, 
-    fetchTodaysQuestion, 
-    submitAnswer, 
-    fetchAnswers 
+  const {
+    todaysQuestion,
+    myAnswer,
+    partnerAnswer,
+    isLoading,
+    error,
+    fetchTodaysQuestion,
+    submitAnswer,
+    fetchAnswers,
   } = useQuestionStore();
 
   const [answerContent, setAnswerContent] = useState('');
@@ -43,7 +43,7 @@ const HomePage: React.FC = () => {
     try {
       setIsSubmitting(true);
       await submitAnswer(answerContent.trim());
-      await fetchAnswers();
+      // fetchAnswers는 submitAnswer 내부에서 답변 제출 후 myAnswer가 업데이트되므로 불필요
     } catch (error) {
       // 에러는 store에서 처리됨
     } finally {
@@ -98,7 +98,10 @@ const HomePage: React.FC = () => {
   if (isLoading && !todaysQuestion) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner size="large" message="오늘의 질문을 불러오고 있어요..." />
+        <LoadingSpinner
+          size="large"
+          message="오늘의 질문을 불러오고 있어요..."
+        />
       </div>
     );
   }
@@ -127,7 +130,9 @@ const HomePage: React.FC = () => {
         <div className="px-4 py-6">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-white text-opacity-90 text-sm">{getGreeting()},</p>
+              <p className="text-white text-opacity-90 text-sm">
+                {getGreeting()},
+              </p>
               <h1 className="text-2xl font-bold">{user?.name}님!</h1>
             </div>
             <div className="flex items-center space-x-2">
@@ -138,8 +143,18 @@ const HomePage: React.FC = () => {
                   className="text-white text-opacity-80 hover:text-opacity-100 p-2"
                   aria-label="가족 초대하기"
                 >
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
                   </svg>
                 </button>
               )}
@@ -148,8 +163,18 @@ const HomePage: React.FC = () => {
                 className="text-white text-opacity-80 hover:text-opacity-100 p-2"
                 aria-label="설정"
               >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
+                  />
                 </svg>
               </button>
             </div>
@@ -157,9 +182,11 @@ const HomePage: React.FC = () => {
 
           {todaysQuestion && (
             <div className="bg-white bg-opacity-10 rounded-lg p-4 backdrop-blur-sm">
-              <p className="text-white text-opacity-90 text-sm mb-2">오늘의 질문</p>
+              <p className="text-white text-opacity-90 text-sm mb-2">
+                오늘의 질문
+              </p>
               <p className="text-white text-lg font-medium leading-relaxed">
-                {todaysQuestion.question.content}
+                {todaysQuestion.content}
               </p>
             </div>
           )}
@@ -177,7 +204,8 @@ const HomePage: React.FC = () => {
                   가족과 함께 문답다리를 해보세요!
                 </h3>
                 <p className="text-blue-700 text-sm mb-3">
-                  혼자서도 질문에 답변할 수 있지만, 가족과 함께하면 더욱 의미 있는 시간이 될 거예요.
+                  혼자서도 질문에 답변할 수 있지만, 가족과 함께하면 더욱 의미
+                  있는 시간이 될 거예요.
                 </p>
                 <Button
                   variant="primary"
@@ -236,7 +264,8 @@ const HomePage: React.FC = () => {
                 </h3>
                 {partnerAnswer && (
                   <p className="text-sm text-gray-500">
-                    {dayjs(partnerAnswer.createdAt).format('MM월 DD일 HH:mm')}에 작성
+                    {dayjs(partnerAnswer.createdAt).format('MM월 DD일 HH:mm')}에
+                    작성
                   </p>
                 )}
               </div>
@@ -276,9 +305,7 @@ const HomePage: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-800 mb-3">
               오늘의 질문이 준비되지 않았어요
             </h2>
-            <p className="text-gray-600 mb-6">
-              잠시 후 다시 확인해주세요
-            </p>
+            <p className="text-gray-600 mb-6">잠시 후 다시 확인해주세요</p>
             <Button onClick={fetchTodaysQuestion} variant="primary">
               다시 확인하기
             </Button>
@@ -298,10 +325,10 @@ const HomePage: React.FC = () => {
             {getPartnerName()}을(를) 초대해보세요!
           </h3>
           <p className="text-gray-600 mb-6 text-sm">
-            아래 링크를 복사해서 {getPartnerName()}에게 보내주세요.
-            함께 매일의 소중한 대화를 나눌 수 있어요.
+            아래 링크를 복사해서 {getPartnerName()}에게 보내주세요. 함께 매일의
+            소중한 대화를 나눌 수 있어요.
           </p>
-          
+
           <div className="bg-gray-50 rounded-lg p-4 mb-4">
             <p className="text-xs text-gray-500 mb-2">초대 링크</p>
             <p className="text-sm text-gray-700 font-mono break-all">
@@ -317,11 +344,7 @@ const HomePage: React.FC = () => {
             >
               닫기
             </Button>
-            <Button
-              variant="primary"
-              fullWidth
-              onClick={handleCopyInviteLink}
-            >
+            <Button variant="primary" fullWidth onClick={handleCopyInviteLink}>
               링크 복사하기
             </Button>
           </div>
@@ -335,9 +358,7 @@ const HomePage: React.FC = () => {
         title="로그아웃"
       >
         <div className="text-center">
-          <p className="text-gray-600 mb-6">
-            정말 로그아웃하시겠어요?
-          </p>
+          <p className="text-gray-600 mb-6">정말 로그아웃하시겠어요?</p>
           <div className="flex space-x-3">
             <Button
               variant="secondary"
@@ -346,11 +367,7 @@ const HomePage: React.FC = () => {
             >
               취소
             </Button>
-            <Button
-              variant="error"
-              fullWidth
-              onClick={handleLogout}
-            >
+            <Button variant="error" fullWidth onClick={handleLogout}>
               로그아웃
             </Button>
           </div>

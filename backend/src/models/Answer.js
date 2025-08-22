@@ -19,10 +19,10 @@ class Answer extends BaseModel {
       };
 
       const answer = await super.create(data);
-      logger.info('Answer created', { 
-        answerId: answer.id, 
+      logger.info('Answer created', {
+        answerId: answer.id,
         questionId: answer.question_id,
-        userId: answer.user_id 
+        userId: answer.user_id,
       });
 
       return answer;
@@ -43,7 +43,7 @@ class Answer extends BaseModel {
     try {
       // First verify ownership
       const answer = await this.findById(answerId);
-      
+
       if (!answer) {
         throw new Error('Answer not found');
       }
@@ -52,9 +52,9 @@ class Answer extends BaseModel {
         throw new Error('Not authorized to update this answer');
       }
 
-      const updated = await this.update(answerId, { 
+      const updated = await this.update(answerId, {
         content,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       });
 
       if (updated) {
@@ -123,7 +123,8 @@ class Answer extends BaseModel {
       `;
 
       const result = await this.query(sql, [questionId, userId, pairId]);
-      const answer = result.rows && result.rows.length > 0 ? result.rows[0] : null;
+      const answer =
+        result.rows && result.rows.length > 0 ? result.rows[0] : null;
 
       if (answer) {
         answer.reactions = await this.getAnswerReactions(answer.id);
@@ -188,7 +189,7 @@ class Answer extends BaseModel {
 
       return {
         answers,
-        pagination: this.buildPagination(page, limit, total)
+        pagination: this.buildPagination(page, limit, total),
       };
     } catch (error) {
       logger.error('Failed to find answers by pair:', error);
@@ -237,7 +238,7 @@ class Answer extends BaseModel {
     try {
       // First verify ownership
       const answer = await this.findById(answerId);
-      
+
       if (!answer) {
         throw new Error('Answer not found');
       }
@@ -247,7 +248,9 @@ class Answer extends BaseModel {
       }
 
       // Delete reactions first (cascade)
-      await this.query('DELETE FROM reactions WHERE answer_id = $1', [answerId]);
+      await this.query('DELETE FROM reactions WHERE answer_id = $1', [
+        answerId,
+      ]);
 
       // Delete the answer
       const deleted = await this.delete(answerId);
@@ -318,10 +321,10 @@ class Answer extends BaseModel {
           WHERE answer_id = $2 AND user_id = $3
           RETURNING *
         `;
-        
+
         const result = await this.query(updateSql, [emoji, answerId, userId]);
         const reaction = result.rows ? result.rows[0] : result.rows[0];
-        
+
         logger.info('Reaction updated', { answerId, userId, emoji });
         return reaction;
       } else {
@@ -331,10 +334,10 @@ class Answer extends BaseModel {
           VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
           RETURNING *
         `;
-        
+
         const result = await this.query(insertSql, [answerId, userId, emoji]);
         const reaction = result.rows ? result.rows[0] : result.rows[0];
-        
+
         logger.info('Reaction added', { answerId, userId, emoji });
         return reaction;
       }
@@ -354,9 +357,9 @@ class Answer extends BaseModel {
     try {
       const sql = 'DELETE FROM reactions WHERE answer_id = $1 AND user_id = $2';
       const result = await this.query(sql, [answerId, userId]);
-      
+
       const deleted = (result.rowCount || result.changes) > 0;
-      
+
       if (deleted) {
         logger.info('Reaction removed', { answerId, userId });
       }
@@ -389,7 +392,7 @@ class Answer extends BaseModel {
       `;
 
       const result = await this.query(sql, [pairId]);
-      
+
       if (result.rows && result.rows.length > 0) {
         const stats = result.rows[0];
         return {

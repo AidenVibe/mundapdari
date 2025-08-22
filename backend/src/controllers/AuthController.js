@@ -3,7 +3,11 @@ const Pair = require('../models/Pair');
 const jwtService = require('../utils/jwt');
 const ApiResponse = require('../utils/response');
 const logger = require('../utils/logger');
-const { NotFoundError, ConflictError, UnauthorizedError } = require('../middleware/errorHandler');
+const {
+  NotFoundError,
+  ConflictError,
+  UnauthorizedError,
+} = require('../middleware/errorHandler');
 
 class AuthController {
   /**
@@ -22,28 +26,29 @@ class AuthController {
 
       // Create new user
       const user = await User.create({ phone, name, role });
-      
+
       if (!user) {
         throw new Error('Failed to create user - returned null');
       }
-      
+
       logger.info('User created successfully', {
         userId: user.id,
         name: user.name,
         role: user.role,
       });
-      
+
       // If invite code is provided, try to pair users
       if (inviteCode) {
         try {
           // Find the pair with this invitation token
           const pair = await Pair.findByInvitationToken(inviteCode);
-          
+
           if (pair && pair.status === 'pending') {
             // Check if the roles are compatible
-            const canPair = (pair.parent_id && role === 'child') || 
-                          (pair.child_id && role === 'parent');
-            
+            const canPair =
+              (pair.parent_id && role === 'child') ||
+              (pair.child_id && role === 'parent');
+
             if (canPair) {
               // Accept the invitation
               await Pair.acceptInvitation(inviteCode, user.id);
@@ -63,7 +68,7 @@ class AuthController {
           });
         }
       }
-      
+
       // Generate JWT tokens
       const tokens = jwtService.generateTokenPair(user);
 
@@ -73,12 +78,15 @@ class AuthController {
         phone: user.phone_masked,
       });
 
-      return ApiResponse.created(res, {
-        user: User.getSafeUserData(user),
-        token: tokens.accessToken,
-        tokens,
-      }, 'User registered successfully');
-
+      return ApiResponse.created(
+        res,
+        {
+          user: User.getSafeUserData(user),
+          token: tokens.accessToken,
+          tokens,
+        },
+        'User registered successfully'
+      );
     } catch (error) {
       logger.error('User registration failed:', error);
       throw error;
@@ -95,7 +103,7 @@ class AuthController {
     try {
       // Find user by phone
       const user = await User.findByPhone(phone);
-      
+
       if (!user) {
         throw new UnauthorizedError('Invalid phone number');
       }
@@ -114,12 +122,15 @@ class AuthController {
         role: user.role,
       });
 
-      return ApiResponse.success(res, {
-        user: User.getSafeUserData(user),
-        token: tokens.accessToken,
-        tokens,
-      }, 'Login successful');
-
+      return ApiResponse.success(
+        res,
+        {
+          user: User.getSafeUserData(user),
+          token: tokens.accessToken,
+          tokens,
+        },
+        'Login successful'
+      );
     } catch (error) {
       logger.error('User login failed:', error);
       throw error;
@@ -136,7 +147,7 @@ class AuthController {
     try {
       // Check if inviter already exists
       let inviter = await User.findByPhone(inviter_phone);
-      
+
       if (!inviter) {
         // Create inviter user
         inviter = await User.create({
@@ -153,18 +164,19 @@ class AuthController {
       }
 
       // Check for pending invitations
-      const pendingPairs = await Pair.find({ 
-        parent_id: inviter.id, 
-        status: 'pending' 
+      const pendingPairs = await Pair.find({
+        parent_id: inviter.id,
+        status: 'pending',
       });
       if (pendingPairs.length > 0) {
         throw new ConflictError('User already has a pending invitation');
       }
 
       // Create pair with invitation token
-      const pairData = inviter_role === 'parent' 
-        ? { parent_id: inviter.id, child_id: null }
-        : { parent_id: null, child_id: inviter.id };
+      const pairData =
+        inviter_role === 'parent'
+          ? { parent_id: inviter.id, child_id: null }
+          : { parent_id: null, child_id: inviter.id };
 
       const pair = await Pair.create(pairData);
 
@@ -178,13 +190,16 @@ class AuthController {
         inviterRole: inviter_role,
       });
 
-      return ApiResponse.created(res, {
-        invitation_url: invitationUrl,
-        invitation_token: pair.invitation_token,
-        expires_at: pair.invitation_expires_at,
-        inviter: User.getSafeUserData(inviter),
-      }, 'Invitation created successfully');
-
+      return ApiResponse.created(
+        res,
+        {
+          invitation_url: invitationUrl,
+          invitation_token: pair.invitation_token,
+          expires_at: pair.invitation_expires_at,
+          inviter: User.getSafeUserData(inviter),
+        },
+        'Invitation created successfully'
+      );
     } catch (error) {
       logger.error('Invitation creation failed:', error);
       throw error;
@@ -202,7 +217,7 @@ class AuthController {
     try {
       // Check if invitee already exists
       let invitee = await User.findByPhone(invitee_phone);
-      
+
       if (!invitee) {
         // Create invitee user
         invitee = await User.create({
@@ -232,7 +247,10 @@ class AuthController {
 
       // Get complete pair information
       const completePair = await Pair.findById(updatedPair.id);
-      const partnerInfo = await Pair.getPairPartner(invitee.id, completePair.id);
+      const partnerInfo = await Pair.getPairPartner(
+        invitee.id,
+        completePair.id
+      );
 
       // Generate JWT tokens for invitee
       const tokens = jwtService.generateTokenPair(invitee);
@@ -243,17 +261,20 @@ class AuthController {
         inviteeRole: invitee_role,
       });
 
-      return ApiResponse.created(res, {
-        user: User.getSafeUserData(invitee),
-        pair: {
-          id: completePair.id,
-          status: completePair.status,
-          partner: partnerInfo,
-          created_at: completePair.created_at,
+      return ApiResponse.created(
+        res,
+        {
+          user: User.getSafeUserData(invitee),
+          pair: {
+            id: completePair.id,
+            status: completePair.status,
+            partner: partnerInfo,
+            created_at: completePair.created_at,
+          },
+          tokens,
         },
-        tokens,
-      }, 'Invitation accepted successfully');
-
+        'Invitation accepted successfully'
+      );
     } catch (error) {
       logger.error('Invitation acceptance failed:', error);
       throw error;
@@ -267,16 +288,20 @@ class AuthController {
   static async verifyToken(req, res) {
     // User info is already added by validateJWT middleware
     const user = await User.findById(req.user.id);
-    
+
     if (!user) {
       throw new UnauthorizedError('User not found');
     }
 
-    return ApiResponse.success(res, {
-      user: User.getSafeUserData(user),
-      token_valid: true,
-      expires_at: new Date(req.user.tokenPayload.exp * 1000),
-    }, 'Token is valid');
+    return ApiResponse.success(
+      res,
+      {
+        user: User.getSafeUserData(user),
+        token_valid: true,
+        expires_at: new Date(req.user.tokenPayload.exp * 1000),
+      },
+      'Token is valid'
+    );
   }
 
   /**
@@ -289,7 +314,7 @@ class AuthController {
     try {
       // Verify refresh token
       const decoded = jwtService.verifyRefreshToken(refresh_token);
-      
+
       // Get user
       const user = await User.findById(decoded.userId);
       if (!user || !user.is_active) {
@@ -301,11 +326,14 @@ class AuthController {
 
       logger.info('Token refreshed', { userId: user.id });
 
-      return ApiResponse.success(res, {
-        user: User.getSafeUserData(user),
-        tokens,
-      }, 'Token refreshed successfully');
-
+      return ApiResponse.success(
+        res,
+        {
+          user: User.getSafeUserData(user),
+          tokens,
+        },
+        'Token refreshed successfully'
+      );
     } catch (error) {
       logger.error('Token refresh failed:', error);
       throw new UnauthorizedError('Token refresh failed');
@@ -325,21 +353,25 @@ class AuthController {
 
       // Get user's pairs
       const pairs = await Pair.findActivePairsForUser(user.id);
-      
+
       // Get user statistics
       const stats = await User.getUserStats(user.id);
 
-      return ApiResponse.success(res, {
-        user: User.getSafeUserData(user),
-        pairs: pairs.map(pair => ({
-          id: pair.id,
-          partner_name: pair.parent_id === user.id ? pair.child_name : pair.parent_name,
-          partner_role: pair.parent_id === user.id ? 'child' : 'parent',
-          created_at: pair.created_at,
-        })),
-        stats,
-      }, 'Profile retrieved successfully');
-
+      return ApiResponse.success(
+        res,
+        {
+          user: User.getSafeUserData(user),
+          pairs: pairs.map((pair) => ({
+            id: pair.id,
+            partner_name:
+              pair.parent_id === user.id ? pair.child_name : pair.parent_name,
+            partner_role: pair.parent_id === user.id ? 'child' : 'parent',
+            created_at: pair.created_at,
+          })),
+          stats,
+        },
+        'Profile retrieved successfully'
+      );
     } catch (error) {
       logger.error('Profile retrieval failed:', error);
       throw error;
@@ -356,17 +388,20 @@ class AuthController {
 
     try {
       const updatedUser = await User.update(userId, { name });
-      
+
       if (!updatedUser) {
         throw new NotFoundError('User not found');
       }
 
       logger.info('Profile updated', { userId });
 
-      return ApiResponse.success(res, {
-        user: User.getSafeUserData(updatedUser),
-      }, 'Profile updated successfully');
-
+      return ApiResponse.success(
+        res,
+        {
+          user: User.getSafeUserData(updatedUser),
+        },
+        'Profile updated successfully'
+      );
     } catch (error) {
       logger.error('Profile update failed:', error);
       throw error;
@@ -386,7 +421,6 @@ class AuthController {
       logger.info('User logged out', { userId });
 
       return ApiResponse.success(res, null, 'Logged out successfully');
-
     } catch (error) {
       logger.error('Logout failed:', error);
       throw error;
@@ -400,13 +434,16 @@ class AuthController {
   static async getUserPairs(req, res) {
     try {
       const pairs = await Pair.findActivePairsForUser(req.user.id);
-      
+
       const pairsWithStats = await Promise.all(
         pairs.map(async (pair) => {
           const stats = await Pair.getPairStats(pair.id);
           return {
             id: pair.id,
-            partner_name: pair.parent_id === req.user.id ? pair.child_name : pair.parent_name,
+            partner_name:
+              pair.parent_id === req.user.id
+                ? pair.child_name
+                : pair.parent_name,
             partner_role: pair.parent_id === req.user.id ? 'child' : 'parent',
             created_at: pair.created_at,
             status: pair.status,
@@ -415,10 +452,13 @@ class AuthController {
         })
       );
 
-      return ApiResponse.success(res, {
-        pairs: pairsWithStats,
-      }, 'Pairs retrieved successfully');
-
+      return ApiResponse.success(
+        res,
+        {
+          pairs: pairsWithStats,
+        },
+        'Pairs retrieved successfully'
+      );
     } catch (error) {
       logger.error('Failed to get user pairs:', error);
       throw error;
@@ -435,7 +475,7 @@ class AuthController {
     try {
       // Deactivate user
       const deactivated = await User.deactivate(userId);
-      
+
       if (!deactivated) {
         throw new NotFoundError('User not found');
       }
@@ -443,13 +483,12 @@ class AuthController {
       // Deactivate all user's pairs
       const pairs = await Pair.findActivePairsForUser(userId);
       await Promise.all(
-        pairs.map(pair => Pair.deactivate(pair.id, 'account_deactivated'))
+        pairs.map((pair) => Pair.deactivate(pair.id, 'account_deactivated'))
       );
 
       logger.info('User account deactivated', { userId });
 
       return ApiResponse.success(res, null, 'Account deactivated successfully');
-
     } catch (error) {
       logger.error('Account deactivation failed:', error);
       throw error;

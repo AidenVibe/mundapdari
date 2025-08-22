@@ -48,15 +48,32 @@ export interface Question {
   updatedAt: string;
 }
 
+// Backend response structure for today's question
+export interface TodaysQuestionResponse {
+  question: {
+    id: number;
+    content: string;
+    category: string;
+  };
+  pair: {
+    id: number;
+    partner_name?: string;
+  };
+  my_answer: Answer | null;
+  partner_answer: Answer | null;
+  both_answered: boolean;
+}
+
+// Transformed structure for frontend use
 export interface TodaysQuestion {
-  id: number;
   questionId: number;
+  content: string;
+  category: string;
   pairId: number;
-  date: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  question: Question;
+  partnerName?: string;
+  myAnswer: Answer | null;
+  partnerAnswer: Answer | null;
+  bothAnswered: boolean;
 }
 
 // Answer Types

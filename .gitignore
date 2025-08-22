@@ -261,3 +261,4 @@ encryption-key.*
 
 # 시스템 파일
 nul
+.cache/

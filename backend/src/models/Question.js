@@ -15,13 +15,15 @@ class Question extends BaseModel {
     try {
       // Get current date in YYYY-MM-DD format
       const today = new Date().toISOString().split('T')[0];
-      
+
       // Calculate day number since epoch to ensure consistent daily questions
-      const dayNumber = Math.floor(new Date(today).getTime() / (1000 * 60 * 60 * 24));
-      
+      const dayNumber = Math.floor(
+        new Date(today).getTime() / (1000 * 60 * 60 * 24)
+      );
+
       // Get total number of active questions
       const totalQuestions = await this.count({ active: true });
-      
+
       if (totalQuestions === 0) {
         logger.warn('No active questions found');
         return null;
@@ -29,24 +31,24 @@ class Question extends BaseModel {
 
       // Use modulo to cycle through questions
       const questionIndex = dayNumber % totalQuestions;
-      
+
       // Get the question at the calculated index
       const questions = await this.find(
         { active: true },
-        { 
+        {
           orderBy: 'order_num ASC, created_at ASC',
           limit: 1,
-          offset: questionIndex 
+          offset: questionIndex,
         }
       );
 
       if (questions.length === 0) {
-        logger.warn('Failed to get today\'s question');
+        logger.warn("Failed to get today's question");
         return null;
       }
 
       const question = questions[0];
-      
+
       // If pairId is provided, also get answers for this question from the pair
       if (pairId) {
         const sql = `
@@ -66,7 +68,7 @@ class Question extends BaseModel {
 
       return question;
     } catch (error) {
-      logger.error('Failed to get today\'s question:', error);
+      logger.error("Failed to get today's question:", error);
       throw error;
     }
   }
@@ -80,7 +82,7 @@ class Question extends BaseModel {
   async findByIdWithAnswers(questionId, pairId = null) {
     try {
       const question = await this.findById(questionId);
-      
+
       if (!question) {
         return null;
       }
@@ -128,7 +130,7 @@ class Question extends BaseModel {
         { category, active: true },
         {
           orderBy: 'order_num ASC, created_at ASC',
-          ...options
+          ...options,
         }
       );
     } catch (error) {
@@ -153,13 +155,13 @@ class Question extends BaseModel {
         {
           orderBy: 'order_num ASC, created_at ASC',
           limit,
-          offset
+          offset,
         }
       );
 
       return {
         questions,
-        pagination: this.buildPagination(page, limit, total)
+        pagination: this.buildPagination(page, limit, total),
       };
     } catch (error) {
       logger.error('Failed to find active questions:', error);
@@ -187,7 +189,10 @@ class Question extends BaseModel {
       };
 
       const question = await super.create(data);
-      logger.info('Question created', { questionId: question.id, category: question.category });
+      logger.info('Question created', {
+        questionId: question.id,
+        category: question.category,
+      });
 
       return question;
     } catch (error) {
@@ -220,9 +225,11 @@ class Question extends BaseModel {
   async setActive(questionId, active) {
     try {
       const updated = await this.update(questionId, { active });
-      
+
       if (updated) {
-        logger.info(`Question ${active ? 'activated' : 'deactivated'}`, { questionId });
+        logger.info(`Question ${active ? 'activated' : 'deactivated'}`, {
+          questionId,
+        });
       }
 
       return updated;
@@ -262,8 +269,10 @@ class Question extends BaseModel {
     try {
       const sql = `SELECT COALESCE(MAX(order_num), 0) as max_order FROM ${this.tableName}`;
       const result = await this.query(sql);
-      
-      const maxOrder = result.rows ? result.rows[0].max_order : result.rows[0].max_order;
+
+      const maxOrder = result.rows
+        ? result.rows[0].max_order
+        : result.rows[0].max_order;
       return parseInt(maxOrder) || 0;
     } catch (error) {
       logger.error('Failed to get max order number:', error);
@@ -301,7 +310,7 @@ class Question extends BaseModel {
       sql += ' GROUP BY q.id';
 
       const result = await this.query(sql, params);
-      
+
       if (result.rows && result.rows.length > 0) {
         const stats = result.rows[0];
         return {

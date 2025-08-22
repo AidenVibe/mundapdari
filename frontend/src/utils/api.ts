@@ -5,6 +5,7 @@ import type {
   UserRegistration,
   AuthResponse,
   TodaysQuestion,
+  TodaysQuestionResponse,
   Answer,
   AnswerSubmission,
   LoginCredentials,
@@ -55,7 +56,8 @@ class ApiClient {
         if (!error.response) {
           error.message = '네트워크 연결을 확인해주세요.';
         } else {
-          error.message = error.response.data?.message || '서버 오류가 발생했습니다.';
+          error.message =
+            error.response.data?.message || '서버 오류가 발생했습니다.';
         }
 
         return Promise.reject(error);
@@ -66,7 +68,7 @@ class ApiClient {
   private async request<T>(config: AxiosRequestConfig): Promise<T> {
     try {
       const response = await this.client.request<ApiResponse<T>>(config);
-      
+
       if (response.data.success) {
         return response.data.data as T;
       } else {
@@ -109,34 +111,70 @@ class ApiClient {
   }
 
   // Questions API
-  async getTodaysQuestion(): Promise<TodaysQuestion> {
-    return this.request<TodaysQuestion>({
+  async getTodaysQuestion(): Promise<TodaysQuestion | null> {
+    const response = await this.request<TodaysQuestionResponse>({
       method: 'GET',
       url: '/questions/today',
     });
+
+    // Handle case when no active pairs or no question available
+    if (!response.question) {
+      return null;
+    }
+
+    // Transform backend response to frontend format
+    return {
+      questionId: response.question.id,
+      content: response.question.content,
+      category: response.question.category,
+      pairId: response.pair.id,
+      partnerName: response.pair.partner_name,
+      myAnswer: response.my_answer,
+      partnerAnswer: response.partner_answer,
+      bothAnswered: response.both_answered,
+    };
   }
 
   // Answers API
   async submitAnswer(data: AnswerSubmission): Promise<Answer> {
+    // Transform frontend data structure to backend expected format
+    const backendData = {
+      question_id: data.todaysQuestionId,
+      content: data.content,
+    };
+
     return this.request<Answer>({
       method: 'POST',
       url: '/answers',
-      data,
+      data: backendData,
     });
   }
 
-  async getMyAnswer(todaysQuestionId: number): Promise<Answer> {
+  async getMyAnswer(questionId: number): Promise<Answer> {
     return this.request<Answer>({
       method: 'GET',
-      url: `/answers/my/${todaysQuestionId}`,
+      url: `/answers/question/${questionId}/mine`,
     });
   }
 
-  async getPartnerAnswer(todaysQuestionId: number): Promise<Answer> {
-    return this.request<Answer>({
+  async getPartnerAnswer(questionId: number): Promise<Answer | null> {
+    // Get all answers for the question, then filter for partner's answer
+    const response = await this.request<{ question: any; answers: Answer[] }>({
       method: 'GET',
-      url: `/answers/partner/${todaysQuestionId}`,
+      url: `/answers/question/${questionId}`,
     });
+
+    // Get current user ID from token or stored user
+    const storedUser = localStorage.getItem('mundapdari_user');
+    if (!storedUser) return null;
+
+    const currentUser = JSON.parse(storedUser);
+
+    // Find partner's answer (not the current user's answer)
+    const partnerAnswer = response.answers?.find(
+      (answer) => answer.userId !== currentUser.id
+    );
+    return partnerAnswer || null;
   }
 
   async updateAnswer(answerId: number, content: string): Promise<Answer> {
@@ -186,9 +224,11 @@ export const api = {
 
   // Answers
   submitAnswer: (data: AnswerSubmission) => apiClient.submitAnswer(data),
-  getMyAnswer: (todaysQuestionId: number) => apiClient.getMyAnswer(todaysQuestionId),
-  getPartnerAnswer: (todaysQuestionId: number) => apiClient.getPartnerAnswer(todaysQuestionId),
-  updateAnswer: (answerId: number, content: string) => apiClient.updateAnswer(answerId, content),
+  getMyAnswer: (questionId: number) => apiClient.getMyAnswer(questionId),
+  getPartnerAnswer: (questionId: number) =>
+    apiClient.getPartnerAnswer(questionId),
+  updateAnswer: (answerId: number, content: string) =>
+    apiClient.updateAnswer(answerId, content),
 
   // Utils
   healthCheck: () => apiClient.healthCheck(),

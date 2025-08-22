@@ -6,10 +6,12 @@ class NotificationService {
     this.redisAvailable = false;
     this.notificationQueue = null;
     this.initialized = false;
-    
+
     // Check if Redis is available in development
     if (config.app.env === 'development') {
-      logger.info('Notification service running in development mode without Redis');
+      logger.info(
+        'Notification service running in development mode without Redis'
+      );
       this.redisAvailable = false;
       this.initialized = true;
     } else {
@@ -21,7 +23,7 @@ class NotificationService {
   async initializeRedis() {
     try {
       const Queue = require('bull');
-      
+
       // Initialize Bull queue for notification processing
       this.notificationQueue = new Queue('notification processing', {
         redis: {
@@ -45,10 +47,13 @@ class NotificationService {
       this.setupQueueEvents();
       this.redisAvailable = true;
       this.initialized = true;
-      
+
       logger.info('Notification service initialized with Redis queue');
     } catch (error) {
-      logger.warn('Redis not available, notification service running in fallback mode:', error.message);
+      logger.warn(
+        'Redis not available, notification service running in fallback mode:',
+        error.message
+      );
       this.redisAvailable = false;
       this.initialized = true;
     }
@@ -59,7 +64,7 @@ class NotificationService {
    */
   setupQueueProcessors() {
     if (!this.notificationQueue) return;
-    
+
     // Process daily question notifications
     this.notificationQueue.process('daily-question', async (job) => {
       const { pairId, questionId } = job.data;
@@ -87,7 +92,11 @@ class NotificationService {
     // Process invitation notifications
     this.notificationQueue.process('invitation-notification', async (job) => {
       const { invitationUrl, recipientPhone, inviterName } = job.data;
-      return this.sendInvitationNotification(invitationUrl, recipientPhone, inviterName);
+      return this.sendInvitationNotification(
+        invitationUrl,
+        recipientPhone,
+        inviterName
+      );
     });
   }
 
@@ -96,7 +105,7 @@ class NotificationService {
    */
   setupQueueEvents() {
     if (!this.notificationQueue) return;
-    
+
     this.notificationQueue.on('completed', (job, result) => {
       logger.info('Notification job completed', {
         jobId: job.id,
@@ -128,7 +137,11 @@ class NotificationService {
    * @param {string} questionId - Question ID
    * @param {Date} scheduleTime - When to send the notification
    */
-  async scheduleDailyQuestionNotification(pairId, questionId, scheduleTime = null) {
+  async scheduleDailyQuestionNotification(
+    pairId,
+    questionId,
+    scheduleTime = null
+  ) {
     try {
       if (!this.redisAvailable) {
         // Development mode - just log and simulate success
@@ -136,7 +149,7 @@ class NotificationService {
           pairId,
           questionId,
           scheduleTime,
-          mode: 'development'
+          mode: 'development',
         });
         return { success: true, mode: 'development' };
       }
@@ -148,7 +161,9 @@ class NotificationService {
         { pairId, questionId },
         {
           delay: Math.max(0, delay),
-          jobId: `daily-question-${pairId}-${new Date().toISOString().split('T')[0]}`,
+          jobId: `daily-question-${pairId}-${
+            new Date().toISOString().split('T')[0]
+          }`,
         }
       );
 
@@ -200,7 +215,9 @@ class NotificationService {
         this.sendKakaoMessage(childUser.phone, message, question.id),
       ]);
 
-      const successCount = results.filter(result => result.status === 'fulfilled').length;
+      const successCount = results.filter(
+        (result) => result.status === 'fulfilled'
+      ).length;
 
       logger.info('Daily question notification sent', {
         pairId,
@@ -228,7 +245,7 @@ class NotificationService {
         logger.info('Development mode: Answer notification scheduled', {
           answerId,
           recipientId,
-          mode: 'development'
+          mode: 'development',
         });
         return { success: true, mode: 'development' };
       }
@@ -280,7 +297,11 @@ class NotificationService {
 
       const message = `${answerUser.name}님이 "${question.content}" 질문에 답변했어요! 지금 확인해보세요 💕`;
 
-      const result = await this.sendKakaoMessage(recipient.phone, message, question.id);
+      const result = await this.sendKakaoMessage(
+        recipient.phone,
+        message,
+        question.id
+      );
 
       logger.info('Answer notification sent', {
         answerId,
@@ -306,7 +327,7 @@ class NotificationService {
         logger.info('Development mode: Reaction notification scheduled', {
           reactionId,
           recipientId,
-          mode: 'development'
+          mode: 'development',
         });
         return { success: true, mode: 'development' };
       }
@@ -353,7 +374,7 @@ class NotificationService {
     try {
       // In production, this would integrate with Kakao Talk Business API
       // For development, we'll just log the message
-      
+
       if (config.app.env === 'development') {
         logger.info('Kakao message (dev mode)', {
           phone: phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-****-$3'),
@@ -392,7 +413,10 @@ class NotificationService {
       const result = await this.sendKakaoMessage(recipientPhone, message);
 
       logger.info('Invitation notification sent', {
-        recipientPhone: recipientPhone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-****-$3'),
+        recipientPhone: recipientPhone.replace(
+          /(\d{3})(\d{4})(\d{4})/,
+          '$1-****-$3'
+        ),
         inviterName,
         success: result.success,
       });
@@ -429,7 +453,10 @@ class NotificationService {
   async addJob(jobType, data, options = {}) {
     try {
       if (!this.redisAvailable) {
-        logger.info(`Development mode: Job ${jobType} added`, { data, options });
+        logger.info(`Development mode: Job ${jobType} added`, {
+          data,
+          options,
+        });
         return { success: true, mode: 'development' };
       }
 
@@ -488,7 +515,7 @@ class NotificationService {
 
       await this.notificationQueue.clean(24 * 60 * 60 * 1000, 'completed');
       await this.notificationQueue.clean(7 * 24 * 60 * 60 * 1000, 'failed');
-      
+
       logger.info('Queue cleanup completed');
     } catch (error) {
       logger.error('Failed to cleanup old jobs:', error);

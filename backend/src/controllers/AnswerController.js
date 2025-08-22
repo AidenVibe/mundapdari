@@ -3,7 +3,11 @@ const Question = require('../models/Question');
 const Pair = require('../models/Pair');
 const ApiResponse = require('../utils/response');
 const logger = require('../utils/logger');
-const { NotFoundError, ConflictError, ForbiddenError } = require('../middleware/errorHandler');
+const {
+  NotFoundError,
+  ConflictError,
+  ForbiddenError,
+} = require('../middleware/errorHandler');
 
 class AnswerController {
   /**
@@ -17,7 +21,7 @@ class AnswerController {
     try {
       // Get user's active pairs
       const pairs = await Pair.findActivePairsForUser(userId);
-      
+
       if (pairs.length === 0) {
         throw new ForbiddenError('No active pairs found');
       }
@@ -31,7 +35,11 @@ class AnswerController {
       }
 
       // Check if user has already answered this question
-      const existingAnswer = await Answer.findUserAnswer(question_id, userId, primaryPair.id);
+      const existingAnswer = await Answer.findUserAnswer(
+        question_id,
+        userId,
+        primaryPair.id
+      );
       if (existingAnswer) {
         throw new ConflictError('You have already answered this question');
       }
@@ -47,7 +55,7 @@ class AnswerController {
       // Get created answer with user info
       const answerWithInfo = await Answer.findById(answer.id);
       const user = req.user;
-      
+
       const response = {
         id: answerWithInfo.id,
         content: answerWithInfo.content,
@@ -72,8 +80,11 @@ class AnswerController {
         pairId: primaryPair.id,
       });
 
-      return ApiResponse.created(res, response, 'Answer submitted successfully');
-
+      return ApiResponse.created(
+        res,
+        response,
+        'Answer submitted successfully'
+      );
     } catch (error) {
       logger.error('Failed to submit answer:', error);
       throw error;
@@ -91,9 +102,13 @@ class AnswerController {
     try {
       // Get user's active pairs
       const pairs = await Pair.findActivePairsForUser(userId);
-      
+
       if (pairs.length === 0) {
-        return ApiResponse.success(res, { answers: [] }, 'No active pairs found');
+        return ApiResponse.success(
+          res,
+          { answers: [] },
+          'No active pairs found'
+        );
       }
 
       const primaryPair = pairs[0];
@@ -105,17 +120,23 @@ class AnswerController {
       }
 
       // Get answers for this question and pair
-      const answers = await Answer.findByQuestionAndPair(questionId, primaryPair.id);
+      const answers = await Answer.findByQuestionAndPair(
+        questionId,
+        primaryPair.id
+      );
 
-      return ApiResponse.success(res, {
-        question: {
-          id: question.id,
-          content: question.content,
-          category: question.category,
+      return ApiResponse.success(
+        res,
+        {
+          question: {
+            id: question.id,
+            content: question.content,
+            category: question.category,
+          },
+          answers,
         },
-        answers,
-      }, 'Answers retrieved successfully');
-
+        'Answers retrieved successfully'
+      );
     } catch (error) {
       logger.error('Failed to get answers for question:', error);
       throw error;
@@ -133,18 +154,29 @@ class AnswerController {
     try {
       // Get user's active pairs
       const pairs = await Pair.findActivePairsForUser(userId);
-      
+
       if (pairs.length === 0) {
-        return ApiResponse.success(res, { answer: null }, 'No active pairs found');
+        return ApiResponse.success(
+          res,
+          { answer: null },
+          'No active pairs found'
+        );
       }
 
       const primaryPair = pairs[0];
-      const answer = await Answer.findUserAnswer(questionId, userId, primaryPair.id);
+      const answer = await Answer.findUserAnswer(
+        questionId,
+        userId,
+        primaryPair.id
+      );
 
-      return ApiResponse.success(res, {
-        answer: answer || null,
-      }, answer ? 'Answer retrieved successfully' : 'No answer found');
-
+      return ApiResponse.success(
+        res,
+        {
+          answer: answer || null,
+        },
+        answer ? 'Answer retrieved successfully' : 'No answer found'
+      );
     } catch (error) {
       logger.error('Failed to get user answer:', error);
       throw error;
@@ -161,11 +193,18 @@ class AnswerController {
 
     try {
       // Pair membership is already verified by middleware
-      const result = await Answer.findByPairPaginated(pairId, parseInt(page), parseInt(limit));
+      const result = await Answer.findByPairPaginated(
+        pairId,
+        parseInt(page),
+        parseInt(limit)
+      );
 
-      return ApiResponse.paginated(res, result.answers, result.pagination,
-        'Pair answers retrieved successfully');
-
+      return ApiResponse.paginated(
+        res,
+        result.answers,
+        result.pagination,
+        'Pair answers retrieved successfully'
+      );
     } catch (error) {
       logger.error('Failed to get answers for pair:', error);
       throw error;
@@ -184,11 +223,14 @@ class AnswerController {
       // Pair membership is already verified by middleware
       const answers = await Answer.getRecentAnswers(pairId, parseInt(days));
 
-      return ApiResponse.success(res, {
-        answers,
-        days: parseInt(days),
-      }, 'Recent answers retrieved successfully');
-
+      return ApiResponse.success(
+        res,
+        {
+          answers,
+          days: parseInt(days),
+        },
+        'Recent answers retrieved successfully'
+      );
     } catch (error) {
       logger.error('Failed to get recent answers:', error);
       throw error;
@@ -205,15 +247,15 @@ class AnswerController {
 
     try {
       const answer = await Answer.findById(id);
-      
+
       if (!answer) {
         throw new NotFoundError('Answer not found');
       }
 
       // Verify user has access to this answer (same pair)
       const pairs = await Pair.findActivePairsForUser(userId);
-      const hasAccess = pairs.some(pair => pair.id === answer.pair_id);
-      
+      const hasAccess = pairs.some((pair) => pair.id === answer.pair_id);
+
       if (!hasAccess) {
         throw new ForbiddenError('Access denied');
       }
@@ -221,11 +263,14 @@ class AnswerController {
       // Get answer with reactions
       const reactions = await Answer.getAnswerReactions(id);
 
-      return ApiResponse.success(res, {
-        ...answer,
-        reactions,
-      }, 'Answer retrieved successfully');
-
+      return ApiResponse.success(
+        res,
+        {
+          ...answer,
+          reactions,
+        },
+        'Answer retrieved successfully'
+      );
     } catch (error) {
       logger.error('Failed to get answer by ID:', error);
       throw error;
@@ -250,8 +295,11 @@ class AnswerController {
 
       logger.info('Answer updated', { answerId: id, userId });
 
-      return ApiResponse.success(res, updatedAnswer, 'Answer updated successfully');
-
+      return ApiResponse.success(
+        res,
+        updatedAnswer,
+        'Answer updated successfully'
+      );
     } catch (error) {
       logger.error('Failed to update answer:', error);
       throw error;
@@ -276,7 +324,6 @@ class AnswerController {
       logger.info('Answer deleted', { answerId: id, userId });
 
       return ApiResponse.success(res, null, 'Answer deleted successfully');
-
     } catch (error) {
       logger.error('Failed to delete answer:', error);
       throw error;
@@ -300,8 +347,8 @@ class AnswerController {
       }
 
       const pairs = await Pair.findActivePairsForUser(userId);
-      const hasAccess = pairs.some(pair => pair.id === answer.pair_id);
-      
+      const hasAccess = pairs.some((pair) => pair.id === answer.pair_id);
+
       if (!hasAccess) {
         throw new ForbiddenError('Access denied');
       }
@@ -311,7 +358,6 @@ class AnswerController {
       logger.info('Reaction added', { answerId: id, userId, emoji });
 
       return ApiResponse.created(res, reaction, 'Reaction added successfully');
-
     } catch (error) {
       logger.error('Failed to add reaction:', error);
       throw error;
@@ -334,8 +380,8 @@ class AnswerController {
       }
 
       const pairs = await Pair.findActivePairsForUser(userId);
-      const hasAccess = pairs.some(pair => pair.id === answer.pair_id);
-      
+      const hasAccess = pairs.some((pair) => pair.id === answer.pair_id);
+
       if (!hasAccess) {
         throw new ForbiddenError('Access denied');
       }
@@ -349,7 +395,6 @@ class AnswerController {
       logger.info('Reaction removed', { answerId: id, userId });
 
       return ApiResponse.success(res, null, 'Reaction removed successfully');
-
     } catch (error) {
       logger.error('Failed to remove reaction:', error);
       throw error;
@@ -372,18 +417,21 @@ class AnswerController {
       }
 
       const pairs = await Pair.findActivePairsForUser(userId);
-      const hasAccess = pairs.some(pair => pair.id === answer.pair_id);
-      
+      const hasAccess = pairs.some((pair) => pair.id === answer.pair_id);
+
       if (!hasAccess) {
         throw new ForbiddenError('Access denied');
       }
 
       const reactions = await Answer.getAnswerReactions(id);
 
-      return ApiResponse.success(res, {
-        reactions,
-      }, 'Reactions retrieved successfully');
-
+      return ApiResponse.success(
+        res,
+        {
+          reactions,
+        },
+        'Reactions retrieved successfully'
+      );
     } catch (error) {
       logger.error('Failed to get answer reactions:', error);
       throw error;
@@ -401,10 +449,13 @@ class AnswerController {
       // Pair membership is already verified by middleware
       const stats = await Answer.getPairAnswerStats(pairId);
 
-      return ApiResponse.success(res, {
-        stats,
-      }, 'Pair answer statistics retrieved successfully');
-
+      return ApiResponse.success(
+        res,
+        {
+          stats,
+        },
+        'Pair answer statistics retrieved successfully'
+      );
     } catch (error) {
       logger.error('Failed to get pair answer stats:', error);
       throw error;
@@ -422,16 +473,16 @@ class AnswerController {
     try {
       // Build conditions
       let conditions = { user_id: userId };
-      
+
       if (pair_id) {
         // Verify user is member of the pair
         const pairs = await Pair.findActivePairsForUser(userId);
-        const hasAccess = pairs.some(pair => pair.id === pair_id);
-        
+        const hasAccess = pairs.some((pair) => pair.id === pair_id);
+
         if (!hasAccess) {
           throw new ForbiddenError('Access denied to this pair');
         }
-        
+
         conditions.pair_id = pair_id;
       }
 
@@ -444,11 +495,18 @@ class AnswerController {
       });
 
       const total = await Answer.count(conditions);
-      const pagination = Answer.buildPagination(parseInt(page), parseInt(limit), total);
+      const pagination = Answer.buildPagination(
+        parseInt(page),
+        parseInt(limit),
+        total
+      );
 
-      return ApiResponse.paginated(res, answers, pagination,
-        'Answer history retrieved successfully');
-
+      return ApiResponse.paginated(
+        res,
+        answers,
+        pagination,
+        'Answer history retrieved successfully'
+      );
     } catch (error) {
       logger.error('Failed to get user answer history:', error);
       throw error;
@@ -465,40 +523,53 @@ class AnswerController {
 
     try {
       // Pair membership is already verified by middleware
-      
+
       // Get all answers for the pair
-      const answers = await Answer.find({ pair_id: pairId }, {
-        orderBy: 'answered_at ASC',
-      });
+      const answers = await Answer.find(
+        { pair_id: pairId },
+        {
+          orderBy: 'answered_at ASC',
+        }
+      );
 
       if (format === 'csv') {
         // Generate CSV
         const csvHeader = 'Date,Question,Answer,User,Role\n';
-        const csvData = answers.map(answer => {
-          const date = new Date(answer.answered_at).toISOString().split('T')[0];
-          const question = answer.question_content || 'Question not found';
-          const content = `"${answer.content.replace(/"/g, '""')}"`;
-          const user = answer.user_name || 'Unknown';
-          const role = answer.user_role || 'Unknown';
-          
-          return `${date},${question},${content},${user},${role}`;
-        }).join('\n');
+        const csvData = answers
+          .map((answer) => {
+            const date = new Date(answer.answered_at)
+              .toISOString()
+              .split('T')[0];
+            const question = answer.question_content || 'Question not found';
+            const content = `"${answer.content.replace(/"/g, '""')}"`;
+            const user = answer.user_name || 'Unknown';
+            const role = answer.user_role || 'Unknown';
+
+            return `${date},${question},${content},${user},${role}`;
+          })
+          .join('\n');
 
         const csv = csvHeader + csvData;
 
         res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', `attachment; filename="answers-${pairId}.csv"`);
-        
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="answers-${pairId}.csv"`
+        );
+
         return res.send(csv);
       } else {
         // Return JSON format
-        return ApiResponse.success(res, {
-          answers,
-          exported_at: new Date().toISOString(),
-          format,
-        }, 'Answers exported successfully');
+        return ApiResponse.success(
+          res,
+          {
+            answers,
+            exported_at: new Date().toISOString(),
+            format,
+          },
+          'Answers exported successfully'
+        );
       }
-
     } catch (error) {
       logger.error('Failed to export answers:', error);
       throw error;

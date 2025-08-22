@@ -15,7 +15,9 @@ class User extends BaseModel {
   async create(userData) {
     try {
       // Normalize and encrypt phone number
-      const normalizedPhone = encryptionService.normalizePhoneNumber(userData.phone);
+      const normalizedPhone = encryptionService.normalizePhoneNumber(
+        userData.phone
+      );
       const encryptedPhone = encryptionService.encrypt(normalizedPhone);
 
       const data = {
@@ -26,14 +28,14 @@ class User extends BaseModel {
       };
 
       // Remove any undefined fields
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (data[key] === undefined) {
           delete data[key];
         }
       });
 
       const user = await super.create(data);
-      
+
       // Return user with decrypted phone for API response
       return this.decryptUserPhone(user);
     } catch (error) {
@@ -50,10 +52,10 @@ class User extends BaseModel {
   async findByPhone(phone) {
     try {
       const normalizedPhone = encryptionService.normalizePhoneNumber(phone);
-      
+
       // Get all users and decrypt phones to find match (not ideal for large datasets)
       const users = await super.find();
-      
+
       for (const user of users) {
         try {
           const decryptedPhone = this.decryptPhone(user.phone);
@@ -65,7 +67,7 @@ class User extends BaseModel {
           continue;
         }
       }
-      
+
       return null;
     } catch (error) {
       logger.error('Failed to find user by phone:', error);
@@ -91,7 +93,7 @@ class User extends BaseModel {
    */
   async find(conditions = {}, options = {}) {
     const users = await super.find(conditions, options);
-    return users.map(user => this.decryptUserPhone(user));
+    return users.map((user) => this.decryptUserPhone(user));
   }
 
   /**
@@ -128,7 +130,7 @@ class User extends BaseModel {
         SET last_active = CURRENT_TIMESTAMP
         WHERE id = $1
       `;
-      
+
       const result = await this.query(sql, [userId]);
       return (result.rowCount || result.changes) > 0;
     } catch (error) {
@@ -175,7 +177,7 @@ class User extends BaseModel {
       `;
 
       const result = await this.query(sql, [userId]);
-      
+
       if (result.rows && result.rows.length > 0) {
         const stats = result.rows[0];
         return {
@@ -222,7 +224,7 @@ class User extends BaseModel {
 
     try {
       const decryptedPhone = this.decryptPhone(user.phone);
-      
+
       return {
         ...user,
         phone: decryptedPhone,

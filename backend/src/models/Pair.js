@@ -29,9 +29,9 @@ class Pair extends BaseModel {
       };
 
       const pair = await super.create(data);
-      logger.info('Pair created with invitation token', { 
-        pairId: pair.id, 
-        status: pair.status 
+      logger.info('Pair created with invitation token', {
+        pairId: pair.id,
+        status: pair.status,
       });
 
       return pair;
@@ -49,7 +49,7 @@ class Pair extends BaseModel {
   async findByInvitationToken(token) {
     try {
       const pair = await this.findOne({ invitation_token: token });
-      
+
       if (!pair) {
         return null;
       }
@@ -57,11 +57,11 @@ class Pair extends BaseModel {
       // Check if invitation is expired
       const now = new Date();
       const expiresAt = new Date(pair.invitation_expires_at);
-      
+
       if (now > expiresAt) {
-        logger.warn('Attempted to use expired invitation token', { 
+        logger.warn('Attempted to use expired invitation token', {
           token: token.substring(0, 8) + '...',
-          expiresAt: pair.invitation_expires_at 
+          expiresAt: pair.invitation_expires_at,
         });
         return null;
       }
@@ -82,7 +82,7 @@ class Pair extends BaseModel {
   async acceptInvitation(token, userId) {
     try {
       const pair = await this.findByInvitationToken(token);
-      
+
       if (!pair) {
         throw new Error('Invalid or expired invitation token');
       }
@@ -93,7 +93,7 @@ class Pair extends BaseModel {
         invitation_token: null,
         invitation_expires_at: null,
       };
-      
+
       if (pair.parent_id && !pair.child_id) {
         // Parent exists, add child
         updateData.child_id = userId;
@@ -185,7 +185,7 @@ class Pair extends BaseModel {
 
       const result = await this.query(sql, [userId1, userId2]);
       const count = result.rows ? result.rows[0].count : result.rows[0].count;
-      
+
       return parseInt(count) > 0;
     } catch (error) {
       logger.error('Failed to check if users are paired:', error);
@@ -233,7 +233,7 @@ class Pair extends BaseModel {
       sql += ' LIMIT 1';
 
       const result = await this.query(sql, params);
-      return (result.rows && result.rows.length > 0) ? result.rows[0] : null;
+      return result.rows && result.rows.length > 0 ? result.rows[0] : null;
     } catch (error) {
       logger.error('Failed to get pair partner:', error);
       throw error;
@@ -314,7 +314,7 @@ class Pair extends BaseModel {
       `;
 
       const result = await this.query(sql, [pairId]);
-      
+
       if (result.rows && result.rows.length > 0) {
         const stats = result.rows[0];
         return {

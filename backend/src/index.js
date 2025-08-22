@@ -31,16 +31,16 @@ class MundapdariServer {
       // Initialize external services
       await this.initializeDatabase();
       await this.initializeRedis();
-      
+
       // Setup Express middleware
       this.setupMiddleware();
-      
+
       // Setup routes
       this.setupRoutes();
-      
+
       // Setup error handling (must be last)
       this.setupErrorHandling();
-      
+
       console.log('🚀 Mundapdari server initialized successfully');
     } catch (error) {
       console.error('❌ Server initialization failed:', error);
@@ -67,7 +67,7 @@ class MundapdariServer {
 
     try {
       this.redisClient = createClient(config.redis);
-      
+
       this.redisClient.on('error', (err) => {
         console.error('❌ Redis Client Error:', err);
       });
@@ -82,32 +82,39 @@ class MundapdariServer {
 
       await this.redisClient.connect();
     } catch (error) {
-      console.warn('⚠️ Redis connection failed, continuing without cache:', error.message);
+      console.warn(
+        '⚠️ Redis connection failed, continuing without cache:',
+        error.message
+      );
       this.redisClient = null;
     }
   }
 
   setupMiddleware() {
     // Security middleware
-    this.app.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'"],
-          imgSrc: ["'self'", "data:", "https:"],
+    this.app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+          },
         },
-      },
-      crossOriginEmbedderPolicy: false,
-    }));
+        crossOriginEmbedderPolicy: false,
+      })
+    );
 
     // CORS configuration
-    this.app.use(cors({
-      origin: config.cors.origin,
-      credentials: config.cors.credentials,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    }));
+    this.app.use(
+      cors({
+        origin: config.cors.origin,
+        credentials: config.cors.credentials,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      })
+    );
 
     // Rate limiting
     const limiter = rateLimit({
@@ -130,9 +137,11 @@ class MundapdariServer {
 
     // Request logging
     if (config.app.env !== 'test') {
-      this.app.use(morgan('combined', {
-        stream: { write: (message) => logger.info(message.trim()) }
-      }));
+      this.app.use(
+        morgan('combined', {
+          stream: { write: (message) => logger.info(message.trim()) },
+        })
+      );
     }
 
     // Custom request logger middleware
@@ -177,7 +186,7 @@ class MundapdariServer {
               'POST /api/auth/refresh': 'Refresh JWT token',
             },
             questions: {
-              'GET /api/questions/today': 'Get today\'s question',
+              'GET /api/questions/today': "Get today's question",
               'GET /api/questions/:id': 'Get specific question',
             },
             answers: {
@@ -243,7 +252,7 @@ class MundapdariServer {
 🔗 Cache: ${this.redisClient ? 'Redis' : 'Disabled'}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         `);
-        
+
         logger.info('Server started successfully', {
           port: config.app.port,
           environment: config.app.env,
@@ -260,7 +269,6 @@ class MundapdariServer {
         }
         process.exit(1);
       });
-
     } catch (error) {
       console.error('❌ Failed to start server:', error);
       process.exit(1);

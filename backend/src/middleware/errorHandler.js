@@ -28,19 +28,31 @@ const errorHandler = (err, req, res, next) => {
     statusCode = 422;
     message = 'Validation failed';
     errors = err.details || err.errors;
-  } else if (err.name === 'UnauthorizedError' || err.message.includes('unauthorized')) {
+  } else if (
+    err.name === 'UnauthorizedError' ||
+    err.message.includes('unauthorized')
+  ) {
     statusCode = 401;
     message = 'Unauthorized access';
-  } else if (err.name === 'ForbiddenError' || err.message.includes('forbidden')) {
+  } else if (
+    err.name === 'ForbiddenError' ||
+    err.message.includes('forbidden')
+  ) {
     statusCode = 403;
     message = 'Access forbidden';
-  } else if (err.name === 'NotFoundError' || err.message.includes('not found')) {
+  } else if (
+    err.name === 'NotFoundError' ||
+    err.message.includes('not found')
+  ) {
     statusCode = 404;
     message = 'Resource not found';
   } else if (err.name === 'ConflictError' || err.message.includes('conflict')) {
     statusCode = 409;
     message = 'Resource conflict';
-  } else if (err.name === 'TooManyRequestsError' || err.message.includes('rate limit')) {
+  } else if (
+    err.name === 'TooManyRequestsError' ||
+    err.message.includes('rate limit')
+  ) {
     statusCode = 429;
     message = 'Too many requests';
   } else if (err.code === 'LIMIT_FILE_SIZE') {
@@ -148,11 +160,11 @@ const asyncHandler = (fn) => {
 class AppError extends Error {
   constructor(message, statusCode = 500, isOperational = true) {
     super(message);
-    
+
     this.statusCode = statusCode;
     this.isOperational = isOperational;
     this.timestamp = new Date().toISOString();
-    
+
     Error.captureStackTrace(this, this.constructor);
   }
 }
@@ -264,7 +276,7 @@ const errorUtils = {
    */
   logError(error, context = {}) {
     const logLevel = this.isOperationalError(error) ? 'warn' : 'error';
-    
+
     logger[logLevel]('Error occurred:', {
       message: error.message,
       name: error.name,
@@ -286,7 +298,7 @@ const setupErrorHandlers = () => {
       error: error.message,
       stack: error.stack,
     });
-    
+
     process.exit(1);
   });
 
@@ -295,7 +307,7 @@ const setupErrorHandlers = () => {
       reason: reason.message || reason,
       promise: promise.toString(),
     });
-    
+
     process.exit(1);
   });
 
@@ -314,7 +326,7 @@ module.exports = {
   errorHandler,
   notFoundHandler,
   asyncHandler,
-  
+
   // Error classes
   AppError,
   ValidationError,
@@ -323,7 +335,7 @@ module.exports = {
   NotFoundError,
   ConflictError,
   TooManyRequestsError,
-  
+
   // Utilities
   errorUtils,
   setupErrorHandlers,

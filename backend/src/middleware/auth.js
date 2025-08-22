@@ -18,10 +18,10 @@ const validateJWT = async (req, res, next) => {
 
     // Verify token
     const decoded = jwtService.verifyAccessToken(token);
-    
+
     // Get user from database
     const user = await User.findById(decoded.userId);
-    
+
     if (!user) {
       return ApiResponse.unauthorized(res, 'User not found');
     }
@@ -40,7 +40,7 @@ const validateJWT = async (req, res, next) => {
     };
 
     // Update user's last active timestamp (async, don't wait)
-    User.updateLastActive(user.id).catch(error => {
+    User.updateLastActive(user.id).catch((error) => {
       logger.warn('Failed to update user last active:', error);
     });
 
@@ -74,7 +74,7 @@ const optionalJWT = async (req, res, next) => {
     if (token) {
       const decoded = jwtService.verifyAccessToken(token);
       const user = await User.findById(decoded.userId);
-      
+
       if (user && user.is_active) {
         req.user = {
           id: user.id,
@@ -85,7 +85,7 @@ const optionalJWT = async (req, res, next) => {
         };
 
         // Update last active
-        User.updateLastActive(user.id).catch(error => {
+        User.updateLastActive(user.id).catch((error) => {
           logger.warn('Failed to update user last active:', error);
         });
       }
@@ -105,7 +105,7 @@ const optionalJWT = async (req, res, next) => {
  */
 const requireRole = (roles) => {
   const requiredRoles = Array.isArray(roles) ? roles : [roles];
-  
+
   return (req, res, next) => {
     if (!req.user) {
       return ApiResponse.unauthorized(res, 'Authentication required');
@@ -130,7 +130,7 @@ const requirePairMembership = async (req, res, next) => {
     }
 
     const pairId = req.params.pairId || req.body.pair_id || req.query.pair_id;
-    
+
     if (!pairId) {
       return ApiResponse.error(res, 'Pair ID required', 400);
     }
@@ -138,13 +138,16 @@ const requirePairMembership = async (req, res, next) => {
     // Check if user is member of the pair
     const Pair = require('../models/Pair');
     const pair = await Pair.findById(pairId);
-    
+
     if (!pair) {
       return ApiResponse.notFound(res, 'Pair not found');
     }
 
     if (pair.parent_id !== req.user.id && pair.child_id !== req.user.id) {
-      return ApiResponse.forbidden(res, 'Access denied: Not a member of this pair');
+      return ApiResponse.forbidden(
+        res,
+        'Access denied: Not a member of this pair'
+      );
     }
 
     if (pair.status !== 'active') {
@@ -172,7 +175,7 @@ const requireOwnership = (resourceIdParam = 'id', userIdField = 'user_id') => {
       }
 
       const resourceId = req.params[resourceIdParam];
-      
+
       if (!resourceId) {
         return ApiResponse.error(res, `${resourceIdParam} required`, 400);
       }
@@ -211,8 +214,11 @@ const authRateLimitBypass = (req, res, next) => {
  */
 const devAuthBypass = (req, res, next) => {
   const config = require('../config');
-  
-  if (config.app.env === 'development' && req.headers['x-dev-bypass'] === 'true') {
+
+  if (
+    config.app.env === 'development' &&
+    req.headers['x-dev-bypass'] === 'true'
+  ) {
     // Create a mock user for development
     req.user = {
       id: 'dev-user-id',
@@ -221,13 +227,13 @@ const devAuthBypass = (req, res, next) => {
       role: 'parent',
       tokenPayload: { userId: 'dev-user-id' },
     };
-    
+
     logger.warn('Development authentication bypass used', {
       ip: req.ip,
       userAgent: req.get('User-Agent'),
     });
   }
-  
+
   next();
 };
 
@@ -238,18 +244,18 @@ const devAuthBypass = (req, res, next) => {
 const validateInvitationToken = async (req, res, next) => {
   try {
     const { invitation_token } = req.body;
-    
+
     if (!invitation_token) {
       return ApiResponse.error(res, 'Invitation token required', 400);
     }
 
     // Verify invitation token
     const decoded = jwtService.verifyInvitationToken(invitation_token);
-    
+
     // Check if invitation is still valid in database
     const Pair = require('../models/Pair');
     const pair = await Pair.findByInvitationToken(invitation_token);
-    
+
     if (!pair) {
       return ApiResponse.error(res, 'Invalid or expired invitation', 400);
     }

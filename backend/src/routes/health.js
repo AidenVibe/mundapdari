@@ -11,10 +11,10 @@ const logger = require('../utils/logger');
 router.get('/', async (req, res) => {
   try {
     const startTime = Date.now();
-    
+
     // Check database health
     const dbHealth = await databaseManager.healthCheck();
-    
+
     // Check Redis health (if available)
     let redisHealth = { status: 'disabled' };
     if (req.app.locals.redis) {
@@ -30,8 +30,9 @@ router.get('/', async (req, res) => {
     const responseTime = Date.now() - startTime;
 
     // Overall health status
-    const isHealthy = dbHealth.status === 'healthy' && 
-                     (redisHealth.status === 'healthy' || redisHealth.status === 'disabled');
+    const isHealthy =
+      dbHealth.status === 'healthy' &&
+      (redisHealth.status === 'healthy' || redisHealth.status === 'disabled');
 
     const healthData = {
       status: isHealthy ? 'healthy' : 'unhealthy',
@@ -47,7 +48,9 @@ router.get('/', async (req, res) => {
       system: {
         memory: {
           used: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
-          total: `${Math.round(process.memoryUsage().heapTotal / 1024 / 1024)}MB`,
+          total: `${Math.round(
+            process.memoryUsage().heapTotal / 1024 / 1024
+          )}MB`,
         },
         cpu: process.cpuUsage(),
         platform: process.platform,
@@ -57,16 +60,15 @@ router.get('/', async (req, res) => {
 
     // Return appropriate status code
     const statusCode = isHealthy ? 200 : 503;
-    
+
     return res.status(statusCode).json({
       success: isHealthy,
       data: healthData,
       timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     logger.error('Health check failed:', error);
-    
+
     return ApiResponse.serverError(res, 'Health check failed');
   }
 });
@@ -78,7 +80,7 @@ router.get('/', async (req, res) => {
 router.get('/detailed', async (req, res) => {
   try {
     const checks = [];
-    
+
     // Database connectivity check
     try {
       const dbHealth = await databaseManager.healthCheck();
@@ -123,16 +125,19 @@ router.get('/detailed', async (req, res) => {
     // External service checks (if any)
     // TODO: Add checks for external services like Kakao API, S3, etc.
 
-    const allHealthy = checks.every(check => 
-      check.status === 'healthy' || check.status === 'disabled'
+    const allHealthy = checks.every(
+      (check) => check.status === 'healthy' || check.status === 'disabled'
     );
 
-    return ApiResponse.success(res, {
-      overall: allHealthy ? 'healthy' : 'unhealthy',
-      checks,
-      timestamp: new Date().toISOString(),
-    }, 'Detailed health check completed');
-
+    return ApiResponse.success(
+      res,
+      {
+        overall: allHealthy ? 'healthy' : 'unhealthy',
+        checks,
+        timestamp: new Date().toISOString(),
+      },
+      'Detailed health check completed'
+    );
   } catch (error) {
     logger.error('Detailed health check failed:', error);
     return ApiResponse.serverError(res, 'Detailed health check failed');
@@ -147,7 +152,7 @@ router.get('/ready', async (req, res) => {
   try {
     // Check if all critical services are ready
     const dbHealth = await databaseManager.healthCheck();
-    
+
     if (dbHealth.status !== 'healthy') {
       return res.status(503).json({
         ready: false,
@@ -160,7 +165,6 @@ router.get('/ready', async (req, res) => {
       ready: true,
       timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     logger.error('Readiness check failed:', error);
     return res.status(503).json({
@@ -191,7 +195,7 @@ router.get('/metrics', async (req, res) => {
   try {
     const memoryUsage = process.memoryUsage();
     const cpuUsage = process.cpuUsage();
-    
+
     const metrics = {
       uptime: process.uptime(),
       memory: {
@@ -214,7 +218,6 @@ router.get('/metrics', async (req, res) => {
     };
 
     return ApiResponse.success(res, metrics, 'Performance metrics retrieved');
-
   } catch (error) {
     logger.error('Failed to get performance metrics:', error);
     return ApiResponse.serverError(res, 'Failed to get performance metrics');

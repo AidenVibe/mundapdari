@@ -34,7 +34,12 @@ class ApiResponse {
    * @param {number} statusCode - HTTP status code (default: 400)
    * @param {any} errors - Detailed error information
    */
-  static error(res, message = 'An error occurred', statusCode = 400, errors = null) {
+  static error(
+    res,
+    message = 'An error occurred',
+    statusCode = 400,
+    errors = null
+  ) {
     const response = {
       success: false,
       message,
@@ -111,7 +116,9 @@ class ApiResponse {
         page: pagination.page || 1,
         limit: pagination.limit || 10,
         total: pagination.total || 0,
-        totalPages: Math.ceil((pagination.total || 0) / (pagination.limit || 10)),
+        totalPages: Math.ceil(
+          (pagination.total || 0) / (pagination.limit || 10)
+        ),
         hasNext: pagination.hasNext || false,
         hasPrev: pagination.hasPrev || false,
       },
@@ -145,7 +152,11 @@ class ApiResponse {
    * @param {any} data - Response data
    * @param {string} message - Success message
    */
-  static accepted(res, data = null, message = 'Request accepted for processing') {
+  static accepted(
+    res,
+    data = null,
+    message = 'Request accepted for processing'
+  ) {
     return this.success(res, data, message, 202);
   }
 }

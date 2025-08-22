@@ -1,4 +1,14 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npx lint-staged
+# Windows 성능 극대화 환경변수
+export FORCE_COLOR=0
+export NO_UPDATE_NOTIFIER=1
+export NODE_OPTIONS="--max-old-space-size=2048"
+export UV_THREADPOOL_SIZE=128
+
+# Node.js 성능 최적화
+export NODE_ENV=production
+
+# 극한 최적화: 직접 실행 + 스킵 옵션
+LINT_STAGED_LOGFILE=/dev/null node ./node_modules/lint-staged/bin/lint-staged.js --quiet

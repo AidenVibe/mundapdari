@@ -23,20 +23,19 @@ class DatabaseManager {
   async initializePostgreSQL() {
     try {
       this.pool = new Pool(config.database.postgres);
-      
+
       // Test connection
       const client = await this.pool.connect();
       await client.query('SELECT NOW()');
       client.release();
-      
+
       console.log('✅ PostgreSQL database connected successfully');
-      
+
       // Setup connection error handling
       this.pool.on('error', (err) => {
         console.error('❌ Unexpected error on idle PostgreSQL client', err);
         process.exit(-1);
       });
-      
     } catch (error) {
       console.error('❌ Error connecting to PostgreSQL:', error);
       throw error;
@@ -48,7 +47,7 @@ class DatabaseManager {
       // Ensure database directory exists
       const dbPath = config.database.sqlite.filename;
       const dbDir = path.dirname(dbPath);
-      
+
       if (!fs.existsSync(dbDir)) {
         fs.mkdirSync(dbDir, { recursive: true });
       }
@@ -63,10 +62,9 @@ class DatabaseManager {
 
       // Enable foreign keys
       await this.runSQLite('PRAGMA foreign_keys = ON');
-      
+
       // Setup WAL mode for better performance
       await this.runSQLite('PRAGMA journal_mode = WAL');
-      
     } catch (error) {
       console.error('❌ Error initializing SQLite:', error);
       throw error;
@@ -91,7 +89,7 @@ class DatabaseManager {
   // SQLite query methods
   runSQLite(sql, params = []) {
     return new Promise((resolve, reject) => {
-      this.sqlite.run(sql, params, function(err) {
+      this.sqlite.run(sql, params, function (err) {
         if (err) {
           reject(err);
         } else {
@@ -128,7 +126,7 @@ class DatabaseManager {
   async querySQLite(sql, params = []) {
     // Determine query type and call appropriate method
     const queryType = sql.trim().toUpperCase().split(' ')[0];
-    
+
     switch (queryType) {
       case 'SELECT':
         return this.allSQLite(sql, params);
@@ -160,7 +158,7 @@ class DatabaseManager {
       return new Promise((resolve, reject) => {
         this.sqlite.serialize(() => {
           this.sqlite.run('BEGIN TRANSACTION');
-          
+
           callback(this.sqlite)
             .then((result) => {
               this.sqlite.run('COMMIT', (err) => {
@@ -186,9 +184,16 @@ class DatabaseManager {
       } else {
         await this.querySQLite('SELECT 1');
       }
-      return { status: 'healthy', database: this.usePostgres ? 'postgresql' : 'sqlite' };
+      return {
+        status: 'healthy',
+        database: this.usePostgres ? 'postgresql' : 'sqlite',
+      };
     } catch (error) {
-      return { status: 'unhealthy', error: error.message, database: this.usePostgres ? 'postgresql' : 'sqlite' };
+      return {
+        status: 'unhealthy',
+        error: error.message,
+        database: this.usePostgres ? 'postgresql' : 'sqlite',
+      };
     }
   }
 
@@ -199,7 +204,7 @@ class DatabaseManager {
         await this.pool.end();
         console.log('📴 PostgreSQL connection pool closed');
       }
-      
+
       if (!this.usePostgres && this.sqlite) {
         await new Promise((resolve) => {
           this.sqlite.close((err) => {

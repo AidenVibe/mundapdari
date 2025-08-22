@@ -8,13 +8,13 @@ const { v4: uuidv4 } = require('uuid');
 const requestLogger = (req, res, next) => {
   // Generate unique request ID
   req.requestId = uuidv4();
-  
+
   // Add request ID to response headers for debugging
   res.setHeader('X-Request-ID', req.requestId);
-  
+
   // Record start time
   req.startTime = Date.now();
-  
+
   // Extract useful request information
   const requestInfo = {
     requestId: req.requestId,
@@ -34,10 +34,10 @@ const requestLogger = (req, res, next) => {
 
   // Override res.json to log response
   const originalJson = res.json;
-  res.json = function(data) {
+  res.json = function (data) {
     // Calculate response time
     const responseTime = Date.now() - req.startTime;
-    
+
     // Log response information
     const responseInfo = {
       requestId: req.requestId,
@@ -62,7 +62,8 @@ const requestLogger = (req, res, next) => {
     logger[logLevel]('Request completed:', responseInfo);
 
     // Performance warning for slow requests
-    if (responseTime > 5000) { // 5 seconds
+    if (responseTime > 5000) {
+      // 5 seconds
       logger.warn('Slow request detected:', {
         ...responseInfo,
         performance: 'SLOW',
@@ -75,10 +76,10 @@ const requestLogger = (req, res, next) => {
 
   // Override res.send to log non-JSON responses
   const originalSend = res.send;
-  res.send = function(data) {
+  res.send = function (data) {
     if (!res.headersSent && res.statusCode !== 304) {
       const responseTime = Date.now() - req.startTime;
-      
+
       const responseInfo = {
         requestId: req.requestId,
         method: req.method,
@@ -105,9 +106,15 @@ const requestLogger = (req, res, next) => {
   // Handle request body logging for debugging (be careful with sensitive data)
   if (process.env.ENABLE_BODY_LOGGING === 'true' && req.method !== 'GET') {
     // Only log non-sensitive endpoints
-    const sensitiveEndpoints = ['/auth/register', '/auth/login', '/auth/invite'];
-    const isSensitive = sensitiveEndpoints.some(endpoint => req.url.includes(endpoint));
-    
+    const sensitiveEndpoints = [
+      '/auth/register',
+      '/auth/login',
+      '/auth/invite',
+    ];
+    const isSensitive = sensitiveEndpoints.some((endpoint) =>
+      req.url.includes(endpoint)
+    );
+
     if (!isSensitive && req.body) {
       logger.debug('Request body:', {
         requestId: req.requestId,
@@ -125,7 +132,11 @@ const requestLogger = (req, res, next) => {
  */
 const metricsCollector = (req, res, next) => {
   // Skip metrics for health checks and static files
-  if (req.url === '/health' || req.url === '/api/health' || req.url.includes('static')) {
+  if (
+    req.url === '/health' ||
+    req.url === '/api/health' ||
+    req.url.includes('static')
+  ) {
     return next();
   }
 
@@ -133,9 +144,9 @@ const metricsCollector = (req, res, next) => {
 
   // Override response methods to collect metrics
   const originalEnd = res.end;
-  res.end = function(...args) {
+  res.end = function (...args) {
     const responseTime = Date.now() - startTime;
-    
+
     // Collect metrics
     const metrics = {
       timestamp: new Date().toISOString(),
@@ -169,11 +180,11 @@ const sanitizeRequest = (req, res, next) => {
   if (req.body) {
     sanitizeObject(req.body);
   }
-  
+
   if (req.query) {
     sanitizeObject(req.query);
   }
-  
+
   if (req.params) {
     sanitizeObject(req.params);
   }
@@ -208,7 +219,7 @@ function sanitizeObject(obj) {
 const rateLimitInfo = (req, res, next) => {
   // This would typically integrate with your rate limiting middleware
   // For now, we'll add basic headers
-  
+
   const limit = 100; // requests per window
   const windowMs = 15 * 60 * 1000; // 15 minutes
   const remaining = 99; // would be calculated based on actual usage
@@ -228,13 +239,16 @@ const rateLimitInfo = (req, res, next) => {
 const securityHeaders = (req, res, next) => {
   // Request ID for tracking
   res.setHeader('X-Request-ID', req.requestId);
-  
+
   // API version
   res.setHeader('X-API-Version', '1.0.0');
-  
+
   // Prevent caching of sensitive endpoints
   if (req.url.includes('/auth/') || req.url.includes('/api/auth/')) {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader(
+      'Cache-Control',
+      'no-store, no-cache, must-revalidate, private'
+    );
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
   }

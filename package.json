@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "Daily Q&A Family Connection Service - 하루 1문답 가족 대화 서비스",
   "private": true,
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
+  "workspaces": ["backend", "frontend"],
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
@@ -33,13 +30,7 @@
     "type": "git",
     "url": "https://github.com/AidenVibe/mundapdari.git"
   },
-  "keywords": [
-    "family",
-    "communication",
-    "q&a",
-    "korean",
-    "kakaotalk"
-  ],
+  "keywords": ["family", "communication", "q&a", "korean", "kakaotalk"],
   "author": "Your Name",
   "license": "MIT",
   "devDependencies": {
@@ -52,16 +43,8 @@
     "npm": ">=8.0.0"
   },
   "lint-staged": {
-    "backend/**/*.js": [
-      "cd backend && eslint --fix",
-      "cd backend && prettier --write"
-    ],
-    "frontend/**/*.{ts,tsx,js,jsx}": [
-      "cd frontend && eslint --fix",
-      "cd frontend && prettier --write"
-    ],
-    "*.{json,md}": [
-      "prettier --write --ignore-unknown"
+    "*.{js,jsx,ts,tsx,json,md}": [
+      "prettier --write --cache --cache-location=.cache/.prettierCache"
     ]
   }
 }
