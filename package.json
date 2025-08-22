@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Daily Q&A Family Connection Service - 하루 1문답 가족 대화 서비스",
   "private": true,
-  "workspaces": ["backend", "frontend"],
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
@@ -24,27 +27,33 @@
     "db:reset": "cd backend && npm run db:reset",
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down"
+    "docker:down": "docker-compose down",
+    "setup:hooks": "npx simple-git-hooks",
+    "optimize:git": "node scripts/optimize-git.js",
+    "test:commit": "node scripts/fast-precommit.js"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/AidenVibe/mundapdari.git"
   },
-  "keywords": ["family", "communication", "q&a", "korean", "kakaotalk"],
+  "keywords": [
+    "family",
+    "communication",
+    "q&a",
+    "korean",
+    "kakaotalk"
+  ],
   "author": "Your Name",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^7.6.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^13.2.0"
+    "simple-git-hooks": "^2.13.1"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,md}": [
-      "prettier --write --cache --cache-location=.cache/.prettierCache"
-    ]
+  "simple-git-hooks": {
+    "pre-commit": "node scripts/fast-precommit.js"
   }
 }

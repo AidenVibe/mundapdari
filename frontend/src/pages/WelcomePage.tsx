@@ -70,7 +70,7 @@ const WelcomePage: React.FC = () => {
             onClick={handleGetStarted}
             className="shadow-lg"
           >
-            {inviteCode ? '초대 수락하기' : '새로 시작하기'}
+            {inviteCode ? '초대 수락하기' : '회원가입'}
           </Button>
 
           {/* 초대 코드가 없는 경우 추가 옵션 */}
@@ -82,7 +82,7 @@ const WelcomePage: React.FC = () => {
               onClick={() => navigate('/login')}
               className="bg-white bg-opacity-20 text-white border-white border-opacity-30 hover:bg-opacity-30"
             >
-              초대받고 가입하기
+              로그인
             </Button>
           )}
         </div>
@@ -91,7 +91,10 @@ const WelcomePage: React.FC = () => {
         {!inviteCode && (
           <div className="mt-6 text-center">
             <p className="text-white text-opacity-80 text-sm">
-              혼자서도 시작할 수 있고, 나중에 가족을 초대할 수 있어요!
+              처음 사용하시나요? 회원가입 후 가족을 초대해보세요!
+            </p>
+            <p className="text-white text-opacity-60 text-xs mt-1">
+              이미 계정이 있으시면 로그인을 선택해주세요.
             </p>
           </div>
         )}

@@ -175,6 +175,26 @@ package-lock.json
 .temp/
 tmp/
 
+# ========================================
+# ⚡ PERFORMANCE OPTIMIZATION
+# ========================================
+
+# Git hooks and cache
+.husky/
+.cache/
+.eslintcache
+.prettierCache
+.stylelintcache
+.tsbuildinfo
+
+# Performance optimization exclusions
+*.map
+*.min.js
+*.min.css
+vendor/
+public/assets/
+static/assets/
+
 # Backup files
 *.bak
 *.backup

@@ -56,7 +56,16 @@
       "Bash(LINT_STAGED_LOGFILE=/dev/null time node ./node_modules/lint-staged/bin/lint-staged.js --quiet)",
       "Bash(LINT_STAGED_LOGFILE=/dev/null /usr/bin/time node ./node_modules/lint-staged/bin/lint-staged.js --quiet)",
       "mcp__playwright__browser_console_messages",
-      "mcp__playwright__browser_wait_for"
+      "mcp__playwright__browser_wait_for",
+      "Bash(npx simple-git-hooks:*)",
+      "Bash(chmod:*)",
+      "Bash(npm run:*)",
+      "Bash(sqlite3:*)",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__context7__resolve-library-id",
+      "Bash(tasklist)",
+      "Bash(taskkill:*)",
+      "Bash(wmic process where:*)"
     ],
     "deny": [],
     "ask": []

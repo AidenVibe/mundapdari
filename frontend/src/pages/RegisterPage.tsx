@@ -66,8 +66,16 @@ const RegisterPage: React.FC = () => {
       });
       
       navigate('/home');
-    } catch (error) {
-      // 에러는 store에서 처리됨
+    } catch (error: any) {
+      // 409 에러 (중복 전화번호)인 경우 로그인 페이지로 이동할지 묻기
+      if (error.message && error.message.includes('이미 가입된 전화번호입니다')) {
+        const shouldGoToLogin = window.confirm(
+          '이미 가입된 전화번호입니다. 로그인 페이지로 이동하시겠습니까?'
+        );
+        if (shouldGoToLogin) {
+          navigate('/login');
+        }
+      }
     }
   };
 
