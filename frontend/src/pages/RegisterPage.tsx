@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Button, Card, Input, ExistingAccountModal } from '@/components/ui';
+import { Button, Card, Input, LoadingSpinner, ExistingAccountModal } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import type { RegistrationForm, FormErrors } from '@/types';
 
@@ -109,6 +109,26 @@ const RegisterPage: React.FC = () => {
   React.useEffect(() => {
     console.log('Modal state changed:', showExistingAccountModal);
   }, [showExistingAccountModal]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{backgroundColor: '#E9A885'}}>
+        <div className="w-full max-w-md">
+          <div className="text-center text-white mb-8">
+            <div className="w-20 h-20 mx-auto bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm mb-4">
+              <span className="text-3xl">👋</span>
+            </div>
+            <h1 className="text-2xl font-bold mb-2">가입 중...</h1>
+            <LoadingSpinner
+              size="medium"
+              message="잠시만 기다려주세요..."
+              className="mt-4"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{backgroundColor: '#E9A885'}}>

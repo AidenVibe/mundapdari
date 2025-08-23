@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, Input } from '@/components/ui';
+import { Button, Card, Input, LoadingSpinner } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import type { LoginCredentials, FormErrors } from '@/types';
 
@@ -50,6 +50,28 @@ const LoginPage: React.FC = () => {
       // 에러는 store에서 처리됨
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{backgroundColor: '#E9A885'}}>
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="bg-text-box rounded-large p-6">
+              <div className="w-20 h-20 mx-auto bg-success-500 rounded-full flex items-center justify-center shadow-soft mb-4">
+                <span className="text-3xl">🔑</span>
+              </div>
+              <h1 className="text-2xl font-bold mb-2 text-text-dark">로그인 중...</h1>
+              <LoadingSpinner
+                size="medium"
+                message="잠시만 기다려주세요..."
+                className="mt-4"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{backgroundColor: '#E9A885'}}>

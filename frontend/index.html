@@ -3,14 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <!-- 강화된 viewport 설정 - 카카오톡 인앱브라우저 최적화 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="description" content="문답다리 - 가족 간의 소중한 소통을 위한 질문과 답변 앱" />
     
     <!-- 카카오톡 웹뷰 최적화 -->
-    <meta name="format-detection" content="telephone=no" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- 안전 영역 대응 (iOS notch, Android gesture bar) -->
+    <meta name="theme-color" content="#E8A158" />
+    <meta name="msapplication-navbutton-color" content="#E8A158" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- 카카오톡 인앱브라우저 특수 최적화 -->
+    <meta name="kakao-link-web-app-capable" content="yes" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
     
     <!-- 폰트 프리로드 -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />

@@ -5,6 +5,20 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    // 모바일 우선 브레이크포인트 재정의
+    screens: {
+      'xs': '320px',    // iPhone SE, 구형 Android
+      'sm': '375px',    // iPhone 6/7/8, iPhone X
+      'md': '414px',    // iPhone Plus, 큰 Android
+      'lg': '768px',    // Tablet
+      'xl': '1024px',   // Desktop
+      '2xl': '1280px',  // Large Desktop
+      // 세부 모바일 타겟팅
+      'mobile-s': '320px',
+      'mobile-m': '375px', 
+      'mobile-l': '414px',
+      'tablet': '768px',
+    },
     extend: {
       colors: {
         // Warm Orange Pastel - Primary (로고 기반)
@@ -179,6 +193,11 @@ export default {
         'safe-bottom': 'env(safe-area-inset-bottom)',
         'safe-left': 'env(safe-area-inset-left)',
         'safe-right': 'env(safe-area-inset-right)',
+        // 가상 키보드 대응
+        'keyboard': 'env(keyboard-inset-height, 0px)',
+        // 카카오톡 인앱브라우저 특수 간격
+        'kakao-nav': '60px', // 카카오톡 하단 네비게이션
+        'kakao-header': '44px', // 카카오톡 상단 헤더
       },
       // 모바일 터치 타겟 최적화
       minHeight: {
@@ -186,10 +205,19 @@ export default {
         'touch-lg': '56px',   // 큰 터치 타겟
         'button': '48px',     // 기본 버튼 높이
         'input': '52px',      // 입력 필드 높이
+        'screen': '100vh',    // 전체 화면 높이
+        'screen-dynamic': '100dvh', // 동적 화면 높이
+        'screen-small': '100svh',   // 작은 화면 높이
+        'kakao-content': 'calc(100vh - 104px)', // 카카오톡 헤더/네비 제외
       },
       minWidth: {
         'touch': '44px',      // 최소 터치 타겟
         'touch-lg': '56px',   // 큰 터치 타겟
+        'mobile': '320px',    // 최소 모바일 너비
+      },
+      maxHeight: {
+        'keyboard-aware': 'calc(100vh - env(keyboard-inset-height, 0px))',
+        'keyboard-aware-dynamic': 'calc(100dvh - env(keyboard-inset-height, 0px))',
       },
       // 모바일 최적화 애니메이션
       animation: {
@@ -264,6 +292,34 @@ export default {
         'mobile': '12px',  // 모바일 기본
         'card': '16px',    // 카드 기본
         'button': '24px',  // 버튼 기본 (pill 형태)
+      },
+      // 모바일 터치 최적화 유틸리티
+      extend: {
+        transitionProperty: {
+          'height': 'height',
+          'spacing': 'margin, padding',
+        },
+      },
+      // 커스텀 유틸리티
+      screens: {
+        // 세부 디바이스 타겟팅
+        'iphone-se': {'raw': '(max-width: 375px) and (max-height: 667px)'},
+        'iphone-x': {'raw': '(max-width: 375px) and (max-height: 812px)'},
+        'iphone-plus': {'raw': '(max-width: 414px) and (max-height: 736px)'},
+        'android-small': {'raw': '(max-width: 360px)'},
+        'android-large': {'raw': '(min-width: 400px) and (max-width: 480px)'},
+        // 가로/세로 모드
+        'portrait': {'raw': '(orientation: portrait)'},
+        'landscape': {'raw': '(orientation: landscape)'},
+        // 터치 디바이스 감지
+        'touch': {'raw': '(hover: none) and (pointer: coarse)'},
+        'no-touch': {'raw': '(hover: hover) and (pointer: fine)'},
+        // 다크모드 지원 준비
+        'dark': {'raw': '(prefers-color-scheme: dark)'},
+        'light': {'raw': '(prefers-color-scheme: light)'},
+        // 접근성 설정
+        'reduce-motion': {'raw': '(prefers-reduced-motion: reduce)'},
+        'high-contrast': {'raw': '(prefers-contrast: high)'},
       }
     },
   },

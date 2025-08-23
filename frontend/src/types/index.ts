@@ -6,6 +6,28 @@ export interface ApiResponse<T = any> {
   error?: string;
 }
 
+// Answer Status Types
+export enum AnswerStatus {
+  PENDING = 'pending',
+  WRITING = 'writing', 
+  SUBMITTED = 'submitted',
+  BOTH_COMPLETED = 'both_completed'
+}
+
+export interface AnswerStatusInfo {
+  myStatus: 'pending' | 'writing' | 'submitted';
+  partnerStatus: 'pending' | 'writing' | 'submitted';
+  bothCompleted: boolean;
+  lastUpdated?: string;
+}
+
+export interface QAFlowState {
+  answerStatus: AnswerStatusInfo;
+  showCelebration: boolean;
+  canViewPartnerAnswer: boolean;
+  notificationCount: number;
+}
+
 // User Types
 export interface User {
   id: number;

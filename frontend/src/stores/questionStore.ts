@@ -47,7 +47,14 @@ export const useQuestionStore = create<QuestionStore>((set, get) => ({
       });
 
       if (!error.message?.includes('질문이 없습니다')) {
-        toast.error(errorMessage);
+        // 네트워크 오류 또는 시간 초과 시 더 친화적인 메시지
+        if (error.code === 'NETWORK_ERROR' || error.name === 'NetworkError') {
+          toast.error('네트워크 연결을 확인해주세요. 잠시 후 다시 시도해주세요.');
+        } else if (error.code === 'TIMEOUT') {
+          toast.error('서버 응답이 지연되고 있습니다. 조금만 기다려주세요.');
+        } else {
+          toast.error(errorMessage);
+        }
       }
     }
   },
@@ -73,13 +80,25 @@ export const useQuestionStore = create<QuestionStore>((set, get) => ({
       });
 
       toast.success('답변이 저장되었습니다!');
+
+      // 답변 저장 후 파트너 답변 확인을 위해 질문 데이터 새로고침
+      setTimeout(() => {
+        get().fetchTodaysQuestion();
+      }, 1000);
     } catch (error: any) {
       const errorMessage = error.message || '답변 저장에 실패했습니다.';
       set({
         isLoading: false,
         error: errorMessage,
       });
-      toast.error(errorMessage);
+      // 네트워크 오류 또는 시간 초과 시 더 친화적인 메시지
+      if (error.code === 'NETWORK_ERROR' || error.name === 'NetworkError') {
+        toast.error('네트워크 연결을 확인해주세요. 잠시 후 다시 시도해주세요.');
+      } else if (error.code === 'TIMEOUT') {
+        toast.error('서버 응답이 지연되고 있습니다. 조금만 기다려주세요.');
+      } else {
+        toast.error(errorMessage);
+      }
       throw error;
     }
   },

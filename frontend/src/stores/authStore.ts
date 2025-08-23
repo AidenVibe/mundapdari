@@ -42,7 +42,15 @@ export const useAuthStore = create<AuthStore>()(
             token: null,
             isAuthenticated: false,
           });
-          toast.error(errorMessage);
+          
+          // 네트워크 오류 또는 시간 초과 시 더 친화적인 메시지
+          if (error.code === 'NETWORK_ERROR' || error.name === 'NetworkError') {
+            toast.error('네트워크 연결을 확인해주세요. 잠시 후 다시 시도해주세요.');
+          } else if (error.code === 'TIMEOUT') {
+            toast.error('서버 응답이 지연되고 있습니다. 조금만 기다려주세요.');
+          } else {
+            toast.error(errorMessage);
+          }
           throw error;
         }
       },
@@ -92,7 +100,14 @@ export const useAuthStore = create<AuthStore>()(
           
           // 중복 에러가 아닌 경우만 토스트 표시 (UI에서 모달로 처리)
           if (!isDuplicateError) {
-            toast.error(errorMessage);
+            // 네트워크 오류 또는 시간 초과 시 더 친화적인 메시지
+            if (error.code === 'NETWORK_ERROR' || error.name === 'NetworkError') {
+              toast.error('네트워크 연결을 확인해주세요. 잠시 후 다시 시도해주세요.');
+            } else if (error.code === 'TIMEOUT') {
+              toast.error('서버 응답이 지연되고 있습니다. 조금만 기다려주세요.');
+            } else {
+              toast.error(errorMessage);
+            }
           }
           
           throw error;
