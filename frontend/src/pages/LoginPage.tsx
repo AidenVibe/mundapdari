@@ -52,17 +52,19 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-primary flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{backgroundColor: '#E9A885'}}>
       <div className="w-full max-w-md">
         {/* 헤더 */}
-        <div className="text-center text-white mb-8">
-          <div className="w-20 h-20 mx-auto bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm mb-4">
-            <span className="text-3xl">🔑</span>
+        <div className="text-center mb-8">
+          <div className="bg-text-box rounded-large p-6">
+            <div className="w-20 h-20 mx-auto bg-success-500 rounded-full flex items-center justify-center shadow-soft mb-4">
+              <span className="text-3xl">🔑</span>
+            </div>
+            <h1 className="text-2xl font-bold mb-2 text-text-dark">문답다리 로그인</h1>
+            <p className="text-text-medium">
+              전화번호로 로그인하세요
+            </p>
           </div>
-          <h1 className="text-2xl font-bold mb-2">문답다리 로그인</h1>
-          <p className="text-white text-opacity-90">
-            전화번호로 로그인하세요
-          </p>
         </div>
 
         <Card>
@@ -100,27 +102,26 @@ const LoginPage: React.FC = () => {
         </Card>
 
         {/* 다른 옵션들 */}
-        <div className="mt-6 text-center space-y-2">
-          <p className="text-white text-opacity-80 text-sm">
-            아직 회원이 아니신가요?
-          </p>
-          <button
-            onClick={() => navigate('/register')}
-            className="text-white underline text-sm font-medium hover:text-opacity-80"
-            disabled={isLoading}
-          >
-            회원가입하기
-          </button>
-        </div>
-
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => navigate('/')}
-            className="text-white text-sm underline hover:text-opacity-80"
-            disabled={isLoading}
-          >
-            처음으로 돌아가기
-          </button>
+        <div className="mt-6 text-center">
+          <div className="bg-text-box rounded-medium p-4">
+            <p className="text-text-dark text-sm mb-3">
+              아직 회원이 아니신가요?
+            </p>
+            <button
+              onClick={() => navigate('/register')}
+              className="text-success-600 underline text-sm font-medium hover:text-success-700 mb-2 block w-full"
+              disabled={isLoading}
+            >
+              회원가입하기
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="text-text-medium text-xs underline hover:text-text-dark"
+              disabled={isLoading}
+            >
+              처음으로 돌아가기
+            </button>
+          </div>
         </div>
       </div>
     </div>

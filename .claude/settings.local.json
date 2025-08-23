@@ -71,7 +71,9 @@
       "Bash(echo $PORT)",
       "mcp__magic__21st_magic_component_builder",
       "mcp__magic__21st_magic_component_inspiration",
-      "mcp__playwright__browser_resize"
+      "mcp__playwright__browser_resize",
+      "Bash(git commit:*)",
+      "Bash(claude mcp:*)"
     ],
     "deny": [],
     "ask": []

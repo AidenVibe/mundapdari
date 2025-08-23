@@ -72,18 +72,18 @@ export default {
           800: '#6b21d4', // Very deep lavender
           900: '#4c1d95', // Darkest lavender
         },
-        // Light Green Pastel - Success
+        // Espresso Brown - Primary & Success (전문적인 밤색 테마)
         success: {
-          50: '#f7fef9',  // Almost white green
-          100: '#edf9f0', // Lightest green
-          200: '#d3f4db', // Very light green
-          300: '#b3e8c2', // Light green (main)
-          400: '#8fd9a1', // Soft green
-          500: '#66c176', // Medium green
-          600: '#4fa55f', // Darker green
-          700: '#3d8a4a', // Deep green
-          800: '#2d6635', // Very deep green
-          900: '#1f4a24', // Darkest green
+          50: '#faf9f8',  // Cream Whisper - 매우 연한 크림
+          100: '#f5f2ef', // Warm Ivory - 따뜻한 아이보리
+          200: '#e8ddd5', // Soft Beige - 부드러운 베이지
+          300: '#d4c2b0', // Sandy Tan - 모래 탠
+          400: '#b8956f', // Caramel Gold - 캐러멜 골드
+          500: '#60300D', // Espresso Brown - 에스프레소 브라운 (메인 브랜드)
+          600: '#4d2409', // Dark Chocolate - 다크 초콜릿
+          700: '#3d1c07', // Coffee Bean - 커피빈
+          800: '#2f1505', // Burnt Umber - 번트 엄버
+          900: '#1f0e03', // Midnight Brown - 미드나이트 브라운
         },
         // Light Orange Pastel - Warning
         warning: {
@@ -111,26 +111,33 @@ export default {
           800: '#9b2c2c', // Very deep rose
           900: '#742a2a', // Darkest rose
         },
-        // Neutral Grays (warm toned)
-        gray: {
-          50: '#faf9f8',   // Warm white
-          100: '#f5f4f2',  // Very light warm gray
-          200: '#ebe8e4',  // Light warm gray
-          300: '#d6d1cb',  // Medium-light warm gray
-          400: '#b8b0a6',  // Medium warm gray
-          500: '#9a8f82',  // Medium warm gray
-          600: '#7d725f',  // Medium-dark warm gray
-          700: '#615740',  // Dark warm gray
-          800: '#454129',  // Very dark warm gray
-          900: '#2d2b1a',  // Darkest warm gray
+        // Neutral Colors (새로운 secondary 버튼용)
+        neutral: {
+          50: '#fafafa',   // Pure white
+          100: '#f5f5f5',  // Very light gray
+          200: '#e5e5e5',  // Light gray
+          300: '#d4d4d4',  // Medium-light gray
+          400: '#a3a3a3',  // Medium gray
+          500: '#8B8680',  // 새로운 secondary 버튼 색상 (브라운 그레이)
+          600: '#737373',  // Medium-dark gray
+          700: '#525252',  // Dark gray
+          800: '#404040',  // Very dark gray
+          900: '#262626',  // Darkest gray
         },
-        // Background Colors
+        // Text Colors (가독성 개선)
+        text: {
+          light: '#FFFFFF',     // 어두운 배경용 밝은 텍스트
+          dark: '#4A4238',      // 밝은 배경용 어두운 텍스트 (충분한 대비)
+          medium: '#6B5B4F',    // 중간 톤 텍스트
+        },
+        // Background Colors (플랫 컬러 - 그라데이션 제거)
         background: {
-          primary: '#f0fffe',    // Light mint background
-          secondary: '#ffffff',   // Pure white
-          warm: '#fff9f7',       // Warm peachy background
-          cool: '#faf7ff',       // Cool lavender background
-          soft: '#fff8f2',       // Soft cream background
+          primary: '#E9A885',    // 어두운 베이지 (2-3단계 어둡게)
+          secondary: '#F5F0EA',   // 텍스트 대비용 밝은 크림
+          warm: '#F0E5D8',       // 따뜻한 베이지
+          cool: '#F2EDE8',       // 쿨한 베이지
+          soft: '#F8F3EE',       // 부드러운 크림
+          textBox: 'rgba(255, 255, 255, 0.9)', // 텍스트 가독성용 반투명 박스
         },
       },
       fontFamily: {
@@ -235,15 +242,8 @@ export default {
           '75%': { transform: 'rotate(3deg)' }
         }
       },
-      // 모바일 최적화 그라데이션 (로고 기반 따뜻한 색상)
-      backgroundImage: {
-        'gradient-primary': 'linear-gradient(135deg, #E8A158 0%, #E17B7B 100%)',      // 오렌지 → 코랄 (로고 기반)
-        'gradient-secondary': 'linear-gradient(135deg, #f7b877 0%, #f7b0ab 100%)',     // 부드러운 오렌지 → 코랄
-        'gradient-warm': 'linear-gradient(135deg, #fef9f3 0%, #fef9f8 100%)',         // 따뜻한 배경
-        'gradient-cool': 'linear-gradient(135deg, #fff8f2 0%, #faf7ff 100%)',         // 시원한 배경
-        'gradient-success': 'linear-gradient(135deg, #b3e8c2 0%, #8fd9a1 100%)',      // 성공 (그린 유지)
-        'gradient-error': 'linear-gradient(135deg, #ffb8b8 0%, #ff9999 100%)',        // 오류 (레드 유지)
-      },
+      // 플랫 컬러 (그라데이션 완전 제거)
+      // 그라데이션 대신 단일 배경색 사용
       // 모바일 친화적 그림자
       boxShadow: {
         'soft': '0 2px 8px rgba(0, 0, 0, 0.04)',

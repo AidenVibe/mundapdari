@@ -17,14 +17,15 @@ const Button: React.FC<ButtonProps> = ({
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-button transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation transform active:scale-95';
 
   const variantClasses = {
-    primary: 'bg-gradient-primary text-white hover:shadow-warm focus:ring-primary-300 shadow-soft hover:shadow-soft-lg',
-    secondary: 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200 focus:ring-secondary-300 border-2 border-secondary-200 hover:border-secondary-300',
+    primary: 'bg-success-500 text-white hover:bg-success-600 focus:ring-success-300 shadow-soft hover:shadow-soft-lg', // #60300D 에스프레소 브라운 primary
+    secondary: 'bg-neutral-500 text-white hover:bg-neutral-600 focus:ring-neutral-300 shadow-soft', // #8B8680 브라운 그레이
     accent: 'bg-accent-300 text-accent-800 hover:bg-accent-400 focus:ring-accent-300 shadow-soft hover:shadow-soft-lg',
-    success: 'bg-success-300 text-success-800 hover:bg-success-400 focus:ring-success-300 shadow-soft',
+    success: 'bg-success-400 text-success-800 hover:bg-success-500 focus:ring-success-300 shadow-soft',
     warning: 'bg-warning-300 text-warning-800 hover:bg-warning-400 focus:ring-warning-300 shadow-soft',
     error: 'bg-error-300 text-error-800 hover:bg-error-400 focus:ring-error-300 shadow-soft',
-    ghost: 'bg-transparent text-primary-600 hover:bg-primary-50 focus:ring-primary-300',
-    outline: 'bg-transparent text-primary-600 border-2 border-primary-300 hover:bg-primary-50 hover:border-primary-400 focus:ring-primary-300',
+    ghost: 'bg-transparent text-success-600 hover:bg-success-50 focus:ring-success-300',
+    outline: 'bg-transparent text-success-600 border-2 border-success-400 hover:bg-success-50 hover:border-success-500 focus:ring-success-300',
+    header: 'bg-background-textBox text-text-dark hover:bg-opacity-95 focus:ring-success-300 shadow-soft', // 반투명 박스 스타일
   };
 
   const sizeClasses = {

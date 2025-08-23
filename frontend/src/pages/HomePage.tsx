@@ -163,49 +163,55 @@ const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-8">
       {/* 헤더 */}
-      <div className="bg-gradient-primary text-white pt-safe">
+      <div className="text-white pt-safe" style={{backgroundColor: '#E9A885'}}>
         <div className="px-4 py-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <p className="text-white text-opacity-90 text-sm">
-                {getGreeting()},
-              </p>
-              <h1 className="text-2xl font-bold">{user?.name}님!</h1>
-            </div>
-            <div className="flex items-center space-x-3">
-              {/* 혼자 사용 중일 때 초대 버튼 */}
-              {isAlone() && (
-                <button
-                  onClick={() => setShowInviteModal(true)}
-                  className="text-white text-opacity-90 hover:text-opacity-100 text-sm font-medium bg-white bg-opacity-20 px-3 py-2 rounded-lg backdrop-blur-sm transition-all hover:bg-opacity-30"
+          <div className="bg-text-box rounded-large p-4 mb-4">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <p className="text-text-medium text-base">
+                  {getGreeting()},
+                </p>
+                <h1 className="text-3xl font-bold text-text-dark">{user?.name}님!</h1>
+              </div>
+              <div className="flex items-center space-x-3">
+                {/* 혼자 사용 중일 때 초대 버튼 */}
+                {isAlone() && (
+                  <Button
+                    variant="success"
+                    size="medium"
+                    onClick={() => setShowInviteModal(true)}
+                  >
+                    가족 초대
+                  </Button>
+                )}
+                <Button
+                  variant="secondary"
+                  size="medium"
+                  onClick={() => setShowLogoutModal(true)}
                 >
-                  가족 초대
-                </button>
-              )}
-              <button
-                onClick={() => setShowLogoutModal(true)}
-                className="text-white text-opacity-90 hover:text-opacity-100 text-sm font-medium bg-white bg-opacity-20 px-3 py-2 rounded-lg backdrop-blur-sm transition-all hover:bg-opacity-30"
-              >
-                설정
-              </button>
+                  설정
+                </Button>
+              </div>
             </div>
           </div>
 
           {getCurrentQuestion() && (
-            <div className="bg-white bg-opacity-10 rounded-lg p-4 backdrop-blur-sm">
-              <p className="text-white text-opacity-90 text-sm mb-2">
+            <div className="bg-text-box rounded-lg p-4">
+              <p className="text-text-medium text-base mb-2">
                 {getCurrentQuestion()?.isDefault ? '오늘의 기본 질문' : '오늘의 질문'}
               </p>
-              <p className="text-white text-lg font-medium leading-relaxed">
+              <p className="text-text-dark text-xl font-medium leading-relaxed">
                 {getCurrentQuestion()?.content}
               </p>
               {getCurrentQuestion()?.isDefault && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="small"
                   onClick={generateNewDefaultQuestion}
-                  className="mt-3 text-white text-opacity-80 hover:text-opacity-100 text-sm underline"
+                  className="mt-3 text-white text-opacity-85 hover:text-opacity-100 underline bg-transparent hover:bg-transparent focus:ring-white focus:ring-opacity-50"
                 >
                   다른 질문으로 바꾸기
-                </button>
+                </Button>
               )}
             </div>
           )}
@@ -215,14 +221,14 @@ const HomePage: React.FC = () => {
       <div className="px-4 -mt-4">
         {/* 혼자 사용 중일 때 안내 카드 */}
         {isAlone() && (
-          <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <Card className="mb-6 bg-background-secondary border-success-200">
             <div className="flex items-start space-x-3">
               <div className="text-2xl">👥</div>
               <div className="flex-1">
                 <h3 className="font-semibold text-blue-900 mb-2">
                   가족과 함께 문답다리를 해보세요!
                 </h3>
-                <p className="text-blue-700 text-sm mb-3">
+                <p className="text-blue-700 text-base mb-3 leading-relaxed">
                   혼자서도 질문에 답변할 수 있지만, 가족과 함께하면 더욱 의미
                   있는 시간이 될 거예요.
                 </p>
@@ -242,14 +248,14 @@ const HomePage: React.FC = () => {
           <div className="space-y-6">
             {/* 기본 질문 안내 카드 */}
             {getCurrentQuestion()?.isDefault && (
-              <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+              <Card className="bg-warning-50 border-warning-200">
                 <div className="flex items-start space-x-3">
                   <div className="text-2xl">💡</div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-orange-900 mb-2">
                       기본 질문으로 대화를 시작해보세요!
                     </h3>
-                    <p className="text-orange-700 text-sm mb-3">
+                    <p className="text-orange-700 text-base mb-3 leading-relaxed">
                       서버에서 오늘의 질문이 아직 준비되지 않아 기본 질문을 제공해드려요. 
                       언제든 답변하고 대화를 나눌 수 있어요.
                     </p>
@@ -268,9 +274,32 @@ const HomePage: React.FC = () => {
             {/* 내 답변 카드 */}
             <Card>
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  내 답변
-                </h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    내 답변
+                  </h3>
+                  <div className="flex items-center space-x-2">
+                    {getCurrentQuestion()?.isDefault ? (
+                      defaultAnswer ? (
+                        <span className="px-3 py-1 text-sm font-medium bg-success-100 text-success-700 rounded-full">
+                          ✓ 저장됨
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 text-sm font-medium bg-gray-100 text-gray-600 rounded-full">
+                          📝 작성중
+                        </span>
+                      )
+                    ) : myAnswer ? (
+                      <span className="px-3 py-1 text-sm font-medium bg-success-100 text-success-700 rounded-full">
+                        ✓ 완료
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 text-sm font-medium bg-gray-100 text-gray-600 rounded-full">
+                        📝 작성중
+                      </span>
+                    )}
+                  </div>
+                </div>
                 {getCurrentQuestion()?.isDefault ? (
                   defaultAnswer && (
                     <p className="text-sm text-gray-500">
@@ -287,6 +316,7 @@ const HomePage: React.FC = () => {
               </div>
 
               <Textarea
+                label="나의 답변"
                 value={answerContent}
                 onChange={setAnswerContent}
                 placeholder="솔직하고 진솔한 마음을 담아 답변해주세요..."
@@ -314,9 +344,26 @@ const HomePage: React.FC = () => {
             {/* 상대방 답변 카드 */}
             <Card>
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  {getPartnerName()}의 답변
-                </h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {getPartnerName()}의 답변
+                  </h3>
+                  <div className="flex items-center space-x-2">
+                    {getCurrentQuestion()?.isDefault ? (
+                      <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                        기본 질문
+                      </span>
+                    ) : partnerAnswer ? (
+                      <span className="px-2 py-1 text-xs font-medium bg-success-100 text-success-700 rounded-full">
+                        ✓ 완료
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 text-xs font-medium bg-warning-100 text-warning-700 rounded-full">
+                        ⏳ 대기중
+                      </span>
+                    )}
+                  </div>
+                </div>
                 {partnerAnswer && (
                   <p className="text-sm text-gray-500">
                     {dayjs(partnerAnswer.createdAt).format('MM월 DD일 HH:mm')}에

@@ -16,20 +16,22 @@ const WelcomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-primary flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{backgroundColor: '#E9A885'}}>
       <div className="w-full max-w-md">
         {/* 로고 및 타이틀 */}
-        <div className="text-center text-white mb-12">
-          <div className="mb-6">
-            <div className="w-24 h-24 mx-auto bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <span className="text-4xl">💬</span>
+        <div className="text-center mb-12">
+          <div className="bg-text-box rounded-large p-6 mb-6">
+            <div className="mb-4">
+              <div className="w-24 h-24 mx-auto bg-success-500 rounded-full flex items-center justify-center shadow-soft">
+                <span className="text-4xl">💬</span>
+              </div>
             </div>
+            <h1 className="text-3xl font-bold mb-3 text-text-dark">문답다리</h1>
+            <p className="text-lg text-text-medium leading-relaxed">
+              가족과 함께하는<br />
+              매일의 소중한 대화
+            </p>
           </div>
-          <h1 className="text-3xl font-bold mb-3">문답다리</h1>
-          <p className="text-lg opacity-90 leading-relaxed">
-            가족과 함께하는<br />
-            매일의 소중한 대화
-          </p>
         </div>
 
         {/* 설명 카드 */}
@@ -80,7 +82,6 @@ const WelcomePage: React.FC = () => {
               size="large"
               fullWidth
               onClick={() => navigate('/login')}
-              className="bg-white bg-opacity-20 text-white border-white border-opacity-30 hover:bg-opacity-30"
             >
               이미 사용 중이에요 (로그인)
             </Button>
@@ -90,12 +91,14 @@ const WelcomePage: React.FC = () => {
         {/* 설명 추가 */}
         {!inviteCode && (
           <div className="mt-6 text-center">
-            <p className="text-white text-opacity-80 text-sm">
-              처음 사용하시나요? '새로 시작하기'를 선택해주세요!
-            </p>
-            <p className="text-white text-opacity-60 text-xs mt-1">
-              이미 가입하셨다면 '이미 사용 중이에요'를 선택해주세요.
-            </p>
+            <div className="bg-text-box rounded-medium p-4">
+              <p className="text-text-dark text-sm font-medium">
+                처음 사용하시나요? '새로 시작하기'를 선택해주세요!
+              </p>
+              <p className="text-text-medium text-xs mt-1">
+                이미 가입하셨다면 '이미 사용 중이에요'를 선택해주세요.
+              </p>
+            </div>
           </div>
         )}
       </div>

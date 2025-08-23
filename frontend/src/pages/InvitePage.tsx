@@ -42,14 +42,14 @@ const InvitePage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{backgroundColor: '#E9A885'}}>
         <LoadingSpinner size="large" message="초대 코드를 확인하고 있어요..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-primary flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{backgroundColor: '#E9A885'}}>
       <div className="w-full max-w-md">
         {/* 로고 */}
         <div className="text-center text-white mb-8">

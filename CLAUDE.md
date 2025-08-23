@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Mundapdari Project - Claude Code Context Guide
 
 This file provides comprehensive context for Claude Code instances working on the Mundapdari project.
@@ -76,18 +80,38 @@ The project has been optimized for fast commits:
 
 ### Common Commands
 ```bash
-# Development
-npm run dev          # Start development servers
-npm run build        # Build for production
-npm run lint         # Run ESLint
-npm run test         # Run tests
+# Development - Start both frontend and backend
+npm run dev          # Runs both servers (backend:3000, frontend:5173)
+npm run dev:backend  # Backend only (Node.js/Express on port 3000)
+npm run dev:frontend # Frontend only (Vite dev server on port 5173)
 
-# Database
-npm run db:migrate   # Run database migrations
-npm run db:reset     # Reset database
+# Building
+npm run build        # Build both backend and frontend
+npm run build:backend && npm run build:frontend
 
-# Git (optimized)
-git commit -m "message"  # Fast commits with optimized hooks
+# Testing
+npm run test         # Run all tests (backend + frontend)
+npm run test:backend # Jest tests for API endpoints
+npm run test:frontend # Vitest tests for React components
+npm run test:e2e     # End-to-end tests (currently needs setup)
+
+# Database Operations
+npm run db:migrate   # Run database migrations (SQLite in dev)
+npm run db:seed      # Seed database with test data
+npm run db:reset     # Reset and recreate database
+
+# Code Quality
+npm run lint         # ESLint for both projects
+npm run lint:backend && npm run lint:frontend
+npm run lint:fix     # Auto-fix linting issues
+
+# Git (Ultra-Fast Pre-commit)
+git commit -m "message"  # <1s commits with optimized hooks
+npm run test:commit      # Test commit speed optimization
+
+# Production
+npm start            # Start production server (backend only)
+npm run docker:up    # Start with Docker Compose
 ```
 
 ## SuperClaude Integration
@@ -154,6 +178,33 @@ This project is designed to work with SuperClaude framework:
 - Caching strategies
 - Error handling and logging
 
+## Critical Development Patterns
+
+### Database Operations
+- **Always use BaseModel**: All database operations go through `backend/src/models/index.js` BaseModel class
+- **Dual DB Support**: Code must work with both SQLite (dev) and PostgreSQL (prod) 
+- **Parameter Binding**: Use `$1, $2...` for PostgreSQL and `?, ?...` for SQLite - BaseModel handles this
+- **UUID Primary Keys**: Most models use UUID, not auto-increment IDs
+- **Transactions**: Use `await model.transaction(callback)` for multi-step operations
+
+### Authentication & Security
+- **JWT Tokens**: Stored in authStore with Zustand persistence, managed via `utils/api.ts`
+- **Phone Encryption**: All phone numbers encrypted at rest using `utils/encryption.js`
+- **Environment Secrets**: Never hardcode secrets - use `.env` file and validate in `config/index.js`
+- **Rate Limiting**: Implemented via Express middleware, configured per endpoint
+
+### Frontend State Management
+- **Zustand Stores**: Primary state management in `/stores/` directory
+- **Persistence**: Auth state persists across browser sessions
+- **Error Handling**: Use react-hot-toast for user notifications
+- **API Layer**: All HTTP requests go through `utils/api.ts` with automatic token injection
+
+### Testing Strategy
+- **Backend**: Jest with supertest for API endpoint testing
+- **Frontend**: Vitest + Testing Library for component testing
+- **E2E**: Playwright setup available (in tests directory)
+- **Database**: Use SQLite for test isolation, migrations for schema changes
+
 ## Development Notes for Claude Code
 
 1. **Always check environment variables** before implementing external API integrations
@@ -163,6 +214,9 @@ This project is designed to work with SuperClaude framework:
 5. **Test both SQLite and PostgreSQL** when modifying database operations
 6. **Use SuperClaude personas** for domain-specific development tasks
 7. **Leverage optimized Git workflow** for efficient development cycles
+8. **Check `.env.example`** for all required environment variables before adding new integrations
+9. **Use existing UI components** from `/components/ui/` before creating new ones
+10. **Follow Korean language patterns** in user-facing text and validation messages
 
 ## UX Improvements (2025-08-22)
 
