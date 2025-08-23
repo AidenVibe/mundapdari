@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, LoadingSpinner, Textarea, Modal } from '@/components/ui';
+import { Button, Card, LoadingSpinner, EnhancedAnswerTextarea, Modal } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { useQuestionStore } from '@/stores/questionStore';
 import { getRandomDefaultQuestion, formatDefaultQuestion } from '@/utils/defaultQuestions';
@@ -315,30 +315,22 @@ const HomePage: React.FC = () => {
                 )}
               </div>
 
-              <Textarea
+              <EnhancedAnswerTextarea
                 label="나의 답변"
                 value={answerContent}
                 onChange={setAnswerContent}
+                onSubmit={handleSubmitAnswer}
                 placeholder="솔직하고 진솔한 마음을 담아 답변해주세요..."
                 maxLength={500}
-                rows={5}
                 disabled={isSubmitting}
-                className="mb-4"
-              />
-
-              <Button
-                onClick={handleSubmitAnswer}
-                variant="primary"
-                size="large"
-                fullWidth
-                loading={isSubmitting}
-                disabled={!answerContent.trim() || isSubmitting}
-              >
-                {getCurrentQuestion()?.isDefault 
-                  ? (defaultAnswer ? '답변 수정하기' : '답변 저장하기')
-                  : (myAnswer ? '답변 수정하기' : '답변 저장하기')
+                isSubmitting={isSubmitting}
+                autoSaveKey={`answer_${getCurrentQuestion()?.questionId || 'default'}_${user?.id}`}
+                submitButtonText={
+                  getCurrentQuestion()?.isDefault 
+                    ? (defaultAnswer ? '답변 수정하기' : '답변 저장하기')
+                    : (myAnswer ? '답변 수정하기' : '답변 저장하기')
                 }
-              </Button>
+              />
             </Card>
 
             {/* 상대방 답변 카드 */}

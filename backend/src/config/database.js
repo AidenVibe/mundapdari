@@ -48,8 +48,16 @@ class DatabaseManager {
       const dbPath = config.database.sqlite.filename;
       const dbDir = path.dirname(dbPath);
 
+      console.log('🔍 SQLite Debug Info:');
+      console.log('  - Raw config path:', config.database.sqlite.filename);
+      console.log('  - Resolved path:', path.resolve(dbPath));
+      console.log('  - Working directory:', process.cwd());
+      console.log('  - Directory exists:', fs.existsSync(dbDir));
+      console.log('  - File exists before:', fs.existsSync(dbPath));
+
       if (!fs.existsSync(dbDir)) {
         fs.mkdirSync(dbDir, { recursive: true });
+        console.log('  - Created directory:', dbDir);
       }
 
       this.sqlite = new sqlite3.Database(dbPath, (err) => {
@@ -58,6 +66,17 @@ class DatabaseManager {
           throw err;
         }
         console.log('✅ SQLite database connected successfully');
+        console.log('  - Final database path:', dbPath);
+        console.log('  - File exists after:', fs.existsSync(dbPath));
+        
+        // Test table existence immediately after connection
+        this.sqlite.all("SELECT name FROM sqlite_master WHERE type='table';", (err, rows) => {
+          if (err) {
+            console.error('❌ Error checking tables:', err);
+          } else {
+            console.log('  - Tables found:', rows.map(r => r.name));
+          }
+        });
       });
 
       // Enable foreign keys
@@ -115,6 +134,11 @@ class DatabaseManager {
     return new Promise((resolve, reject) => {
       this.sqlite.all(sql, params, (err, rows) => {
         if (err) {
+          console.error('🔍 SQLite Query Error:', {
+            sql: sql.substring(0, 100),
+            error: err.message,
+            code: err.code
+          });
           reject(err);
         } else {
           resolve({ rows });

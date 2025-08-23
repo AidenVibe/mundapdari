@@ -13,7 +13,7 @@ dayjs.locale('ko');
 
 // 환경 변수 검증
 const requiredEnvVars = {
-  VITE_API_URL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  VITE_API_URL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
   VITE_ENV: import.meta.env.VITE_ENV || 'development',
 };
 

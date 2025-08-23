@@ -95,7 +95,11 @@ class BaseModel {
       const whereClause = Object.keys(conditions)
         .map((key) => {
           params.push(conditions[key]);
-          return `${key} = $${paramIndex++}`;
+          if (databaseManager.usePostgres) {
+            return `${key} = $${paramIndex++}`;
+          } else {
+            return `${key} = ?`;
+          }
         })
         .join(" AND ");
 
@@ -109,12 +113,20 @@ class BaseModel {
 
     // Add LIMIT and OFFSET
     if (options.limit) {
-      sql += ` LIMIT $${paramIndex++}`;
+      if (databaseManager.usePostgres) {
+        sql += ` LIMIT $${paramIndex++}`;
+      } else {
+        sql += ` LIMIT ?`;
+      }
       params.push(options.limit);
     }
 
     if (options.offset) {
-      sql += ` OFFSET $${paramIndex++}`;
+      if (databaseManager.usePostgres) {
+        sql += ` OFFSET $${paramIndex++}`;
+      } else {
+        sql += ` OFFSET ?`;
+      }
       params.push(options.offset);
     }
 
@@ -140,7 +152,13 @@ class BaseModel {
   async create(data) {
     const keys = Object.keys(data);
     const values = Object.values(data);
-    const placeholders = keys.map((_, index) => `$${index + 1}`).join(", ");
+    let placeholders;
+    
+    if (databaseManager.usePostgres) {
+      placeholders = keys.map((_, index) => `$${index + 1}`).join(", ");
+    } else {
+      placeholders = keys.map(() => "?").join(", ");
+    }
 
     if (databaseManager.usePostgres) {
       const sql = `
@@ -197,23 +215,28 @@ class BaseModel {
   async update(id, data) {
     const keys = Object.keys(data);
     const values = Object.values(data);
-    const setClause = keys
-      .map((key, index) => `${key} = $${index + 2}`)
-      .join(", ");
-
-    const sql = `
-      UPDATE ${this.tableName}
-      SET ${setClause}, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $1
-      RETURNING *
-    `;
-
-    const result = await this.query(sql, [id, ...values]);
+    let setClause;
 
     if (databaseManager.usePostgres) {
+      setClause = keys
+        .map((key, index) => `${key} = $${index + 2}`)
+        .join(", ");
+      const sql = `
+        UPDATE ${this.tableName}
+        SET ${setClause}, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $1
+        RETURNING *
+      `;
+      const result = await this.query(sql, [id, ...values]);
       return result.rows.length > 0 ? result.rows[0] : null;
     } else {
-      // For SQLite, we need to fetch the updated record
+      setClause = keys.map((key) => `${key} = ?`).join(", ");
+      const sql = `
+        UPDATE ${this.tableName}
+        SET ${setClause}, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `;
+      const result = await this.query(sql, [...values, id]);
       return result.changes > 0 ? this.findById(id) : null;
     }
   }
@@ -224,7 +247,9 @@ class BaseModel {
    * @returns {Promise<boolean>} - True if deleted, false otherwise
    */
   async delete(id) {
-    const sql = `DELETE FROM ${this.tableName} WHERE id = $1`;
+    const sql = databaseManager.usePostgres 
+      ? `DELETE FROM ${this.tableName} WHERE id = $1`
+      : `DELETE FROM ${this.tableName} WHERE id = ?`;
     const result = await this.query(sql, [id]);
 
     if (databaseManager.usePostgres) {
@@ -248,7 +273,11 @@ class BaseModel {
       const whereClause = Object.keys(conditions)
         .map((key) => {
           params.push(conditions[key]);
-          return `${key} = $${paramIndex++}`;
+          if (databaseManager.usePostgres) {
+            return `${key} = $${paramIndex++}`;
+          } else {
+            return `${key} = ?`;
+          }
         })
         .join(" AND ");
 

@@ -178,6 +178,8 @@ export interface TextareaProps {
   maxLength?: number;
   rows?: number;
   className?: string;
+  autoResize?: boolean;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
 export interface ModalProps {

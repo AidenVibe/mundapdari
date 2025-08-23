@@ -1,6 +1,7 @@
 const { BaseModel } = require('./index');
 const encryptionService = require('../utils/encryption');
 const logger = require('../utils/logger');
+const { v4: uuidv4 } = require('uuid');
 
 class User extends BaseModel {
   constructor() {
@@ -21,11 +22,17 @@ class User extends BaseModel {
       const encryptedPhone = encryptionService.encrypt(normalizedPhone);
 
       const data = {
+        id: uuidv4(), // Generate UUID for new user
         ...userData,
-        phone: JSON.stringify(encryptedPhone), // Store as JSON string
+        phone_encrypted: JSON.stringify(encryptedPhone), // Store as JSON string in correct column
         created_at: new Date().toISOString(),
-        is_active: true,
+        status: 'active', // Use status instead of is_active
       };
+
+      // Remove phone from data since we're using phone_encrypted
+      delete data.phone;
+      // Remove is_active if it exists, use status instead
+      delete data.is_active;
 
       // Remove any undefined fields
       Object.keys(data).forEach((key) => {
@@ -58,7 +65,7 @@ class User extends BaseModel {
 
       for (const user of users) {
         try {
-          const decryptedPhone = this.decryptPhone(user.phone);
+          const decryptedPhone = this.decryptPhone(user.phone_encrypted);
           if (decryptedPhone === normalizedPhone) {
             return this.decryptUserPhone(user);
           }
@@ -110,11 +117,11 @@ class User extends BaseModel {
       FROM pairs p
       JOIN users parent_user ON p.parent_id = parent_user.id
       JOIN users child_user ON p.child_id = child_user.id
-      WHERE (p.parent_id = $1 OR p.child_id = $1)
+      WHERE (p.parent_id = ? OR p.child_id = ?)
         AND p.status = 'active'
     `;
 
-    const result = await this.query(sql, [userId]);
+    const result = await this.query(sql, [userId, userId]);
     return result.rows || result.rows;
   }
 
@@ -128,7 +135,7 @@ class User extends BaseModel {
       const sql = `
         UPDATE ${this.tableName}
         SET last_active = CURRENT_TIMESTAMP
-        WHERE id = $1
+        WHERE id = ?
       `;
 
       const result = await this.query(sql, [userId]);
@@ -146,7 +153,7 @@ class User extends BaseModel {
    */
   async deactivate(userId) {
     try {
-      const updated = await super.update(userId, { is_active: false });
+      const updated = await super.update(userId, { status: 'inactive' });
       return updated !== null;
     } catch (error) {
       logger.error('Failed to deactivate user:', error);
@@ -172,7 +179,7 @@ class User extends BaseModel {
         LEFT JOIN reactions r ON u.id = r.user_id
         LEFT JOIN answers user_answers ON u.id = user_answers.user_id
         LEFT JOIN reactions reactions_received ON user_answers.id = reactions_received.answer_id
-        WHERE u.id = $1
+        WHERE u.id = ?
         GROUP BY u.id
       `;
 
@@ -223,13 +230,15 @@ class User extends BaseModel {
     if (!user) return null;
 
     try {
-      const decryptedPhone = this.decryptPhone(user.phone);
+      const decryptedPhone = this.decryptPhone(user.phone_encrypted);
 
       return {
         ...user,
         phone: decryptedPhone,
         // For API responses, mask the phone number
         phone_masked: encryptionService.maskSensitiveData(decryptedPhone, 3),
+        // Map status to is_active for backward compatibility
+        is_active: user.status === 'active',
       };
     } catch (error) {
       logger.error('Failed to decrypt user phone:', error);
@@ -238,6 +247,7 @@ class User extends BaseModel {
         ...user,
         phone: null,
         phone_masked: '***',
+        is_active: user.status === 'active',
       };
     }
   }
